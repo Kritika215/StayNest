@@ -9,51 +9,36 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CreateProperty from "./pages/CreateProperty";
 
-
 function App() {
   return (
     <BrowserRouter>
+      <Navbar />
 
-      <div className="min-h-screen bg-[#FAFAF8]">
+      <Routes>
+        <Route path="/" element={<Home />} />
 
-        <Navbar />
+        <Route path="/explore" element={<Explore />} />
 
-        <Routes>
+        <Route
+          path="/property/:id"
+          element={<PropertyDetails />}
+        />
 
-          <Route
-            path="/"
-            element={<Home />}
-          />
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
-          <Route
-            path="/explore"
-            element={<Explore />}
-          />
+        <Route
+          path="/register"
+          element={<Register />}
+        />
 
-          <Route
-            path="/property/:id"
-            element={<PropertyDetails />}
-          />
-
-          <Route
-            path="/login"
-            element={<Login />}
-          />
-
-          <Route
-            path="/register"
-            element={<Register />}
-          />
-
-          <Route
-             path="/create-property"
-              element={<CreateProperty />}
-          />
-
-        </Routes>
-
-      </div>
-
+        <Route
+          path="/create-property"
+          element={<CreateProperty />}
+        />
+      </Routes>
     </BrowserRouter>
   );
 }
