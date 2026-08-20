@@ -1,89 +1,163 @@
-import SearchBar from "../components/SearchBar";
-import PropertyCard from "../components/PropertyCard";
-import { properties } from "../data/properties";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api/axios";
 
-function Home() {
+function Login() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setError("");
+
+    if (!formData.email || !formData.password) {
+      setError("Please enter email and password.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await api.post("/auth/login", formData);
+
+      // Save authentication data
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify(response.data.user)
+      );
+
+      // Go to home
+      navigate("/");
+    } catch (error) {
+      console.error("Login failed:", error);
+
+      setError(
+        error.response?.data?.message ||
+          "Login failed. Please check your credentials."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <main>
+    <main className="min-h-[calc(100vh-5rem)] bg-[#F4EFEA] px-4 py-12 sm:px-6 lg:px-8">
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[#F4EFEA]">
+      <div className="mx-auto w-full max-w-md">
 
-        <div className="mx-auto max-w-7xl px-6 pb-20 pt-16 lg:px-8 lg:pb-28 lg:pt-24">
+        {/* Header */}
+        <div className="mb-8 text-center">
 
-          <div className="mx-auto max-w-3xl text-center">
-
-            <span className="inline-flex rounded-full bg-white px-4 py-2 text-sm font-medium text-[#E07A5F] shadow-sm">
-              ✦ Discover your next escape
-            </span>
-
-            <h1 className="mt-7 text-5xl font-bold tracking-tight text-[#1F2937] md:text-7xl">
-              Find a place
-              <br />
-
-              <span className="text-[#E07A5F]">
-                you'll love to stay.
-              </span>
-            </h1>
-
-            <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-gray-600 md:text-lg">
-              Discover beautiful homes, unique stays and unforgettable
-              experiences curated for your next adventure.
-            </p>
-
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E07A5F] text-white shadow-sm">
+            <span className="text-2xl font-bold">S</span>
           </div>
 
-          <SearchBar />
+          <h1 className="mt-6 text-3xl font-bold tracking-tight text-[#1F2937]">
+            Welcome back
+          </h1>
+
+          <p className="mt-2 text-sm text-gray-600">
+            Sign in to continue to StayNest
+          </p>
 
         </div>
 
-      </section>
+        {/* Card */}
+        <div className="rounded-3xl bg-white p-6 shadow-xl sm:p-8">
 
+          <form onSubmit={handleSubmit} className="space-y-5">
 
-      {/* Properties */}
-      <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
+            {/* Error */}
+            {error && (
+              <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                {error}
+              </div>
+            )}
 
-        <div className="mb-10 flex items-end justify-between">
+            {/* Email */}
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Email address
+              </label>
 
-          <div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/20"
+              />
+            </div>
 
-            <p className="text-sm font-semibold uppercase tracking-wider text-[#E07A5F]">
-              Explore stays
-            </p>
+            {/* Password */}
+            <div>
+              <label
+                htmlFor="password"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Password
+              </label>
 
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
-              Popular places to stay
-            </h2>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/20"
+              />
+            </div>
 
-            <p className="mt-3 text-gray-500">
-              Handpicked stays loved by our community.
-            </p>
+            {/* Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-xl bg-[#1F2937] px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-[#374151] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading ? "Signing in..." : "Sign in"}
+            </button>
 
-          </div>
+          </form>
 
-          <button className="hidden rounded-full border border-gray-200 px-5 py-2.5 text-sm font-medium transition hover:bg-gray-50 md:block">
-            View all →
-          </button>
+          {/* Register */}
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="font-semibold text-[#E07A5F] hover:underline"
+            >
+              Create one
+            </Link>
+          </p>
 
         </div>
 
-
-        {/* Property Cards */}
-        <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-
-          {properties.map((property) => (
-            <PropertyCard
-              key={property.id}
-              {...property}
-            />
-          ))}
-
-        </div>
-
-      </section>
+      </div>
 
     </main>
   );
 }
 
-export default Home;
+export default Login;

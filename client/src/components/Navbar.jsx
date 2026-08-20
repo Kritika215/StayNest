@@ -143,14 +143,10 @@ function Navbar() {
                 Experiences
               </Link>
 
-              <Link
-                to="/"
-                onClick={closeMenu}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50"
+              <Link to="/create-property" className="text-sm font-medium text-gray-600 transition hover:text-[#E07A5F]"
               >
-                Become a Host
+               Become a Host
               </Link>
-
             </div>
 
 

@@ -7,6 +7,8 @@ import Explore from "./pages/Explore";
 import PropertyDetails from "./pages/PropertyDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import CreateProperty from "./pages/CreateProperty";
+
 
 function App() {
   return (
@@ -41,6 +43,11 @@ function App() {
           <Route
             path="/register"
             element={<Register />}
+          />
+
+          <Route
+             path="/create-property"
+              element={<CreateProperty />}
           />
 
         </Routes>

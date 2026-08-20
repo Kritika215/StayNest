@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react";
-import { Search, SlidersHorizontal, MapPin } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import PropertyCard from "../components/PropertyCard";
 import api from "../api/axios";
 
 function Explore() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mobileFilters, setMobileFilters] = useState(false);
 
-  const [search, setSearch] = useState("");
-  const [city, setCity] = useState("");
-  const [category, setCategory] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
+  const [filters, setFilters] = useState({
+    search: "",
+    city: "",
+    category: "",
+    minPrice: "",
+    maxPrice: "",
+    guests: "",
+  });
 
   const fetchProperties = async () => {
     try {
@@ -18,16 +23,17 @@ function Explore() {
 
       const params = {};
 
-      if (search) params.search = search;
-      if (city) params.city = city;
-      if (category) params.category = category;
-      if (maxPrice) params.maxPrice = maxPrice;
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) {
+          params[key] = value;
+        }
+      });
 
       const response = await api.get("/properties", {
         params,
       });
 
-      setProperties(response.data.properties);
+      setProperties(response.data.properties || []);
     } catch (error) {
       console.error("Failed to fetch properties:", error);
     } finally {
@@ -39,16 +45,27 @@ function Explore() {
     fetchProperties();
   }, []);
 
+  const handleChange = (e) => {
+    setFilters({
+      ...filters,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     fetchProperties();
   };
 
   const clearFilters = () => {
-    setSearch("");
-    setCity("");
-    setCategory("");
-    setMaxPrice("");
+    setFilters({
+      search: "",
+      city: "",
+      category: "",
+      minPrice: "",
+      maxPrice: "",
+      guests: "",
+    });
 
     setTimeout(() => {
       fetchProperties();
@@ -56,230 +73,332 @@ function Explore() {
   };
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[#FAFAF8]">
 
       {/* Header */}
-      <section className="border-b border-gray-100 bg-[#F4EFEA]">
-
-        <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+      <section className="border-b border-gray-100 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
           <p className="text-sm font-semibold uppercase tracking-wider text-[#E07A5F]">
-            Explore StayNest
+            Explore
           </p>
 
-          <h1 className="mt-2 text-4xl font-bold tracking-tight text-[#1F2937] md:text-5xl">
-            Find your perfect stay
-          </h1>
+          <div className="mt-2 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
 
-          <p className="mt-4 max-w-2xl text-gray-600">
-            Search beautiful homes, apartments and unique stays across India.
-          </p>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                Find your perfect stay
+              </h1>
+
+              <p className="mt-2 max-w-xl text-sm leading-6 text-gray-500 sm:text-base">
+                Search beautiful homes and unique stays that match your plans.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setMobileFilters(true)}
+              className="flex w-fit items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm md:hidden"
+            >
+              <SlidersHorizontal size={17} />
+              Filters
+            </button>
+
+          </div>
 
         </div>
-
       </section>
 
+      <div className="mx-auto flex max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:px-8">
 
-      {/* Search + Filters */}
-      <section className="sticky top-20 z-40 border-b border-gray-100 bg-white/95 backdrop-blur">
+        {/* Desktop Filters */}
+        <aside className="hidden w-64 shrink-0 md:block">
 
-        <div className="mx-auto max-w-7xl px-6 py-5 lg:px-8">
+          <div className="sticky top-28 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
 
+            <div className="flex items-center justify-between">
+
+              <h2 className="font-semibold text-gray-900">
+                Filters
+              </h2>
+
+              <button
+                onClick={clearFilters}
+                className="text-xs font-medium text-[#E07A5F] hover:underline"
+              >
+                Clear
+              </button>
+
+            </div>
+
+            <FilterContent
+              filters={filters}
+              handleChange={handleChange}
+            />
+
+            <button
+              onClick={handleSearch}
+              className="mt-6 w-full rounded-xl bg-[#1F2937] px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800"
+            >
+              Apply filters
+            </button>
+
+          </div>
+
+        </aside>
+
+        {/* Main */}
+        <section className="min-w-0 flex-1">
+
+          {/* Search */}
           <form
             onSubmit={handleSearch}
-            className="flex flex-col gap-3 lg:flex-row"
+            className="mb-8 flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:flex-row"
           >
 
-            {/* Search */}
             <div className="relative flex-1">
 
               <Search
-                size={20}
+                size={19}
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
               />
 
               <input
                 type="text"
-                placeholder="Search destination or stay..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-12 w-full rounded-xl border border-gray-200 bg-white pl-12 pr-4 outline-none transition focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/20"
+                name="search"
+                value={filters.search}
+                onChange={handleChange}
+                placeholder="Search by destination or property..."
+                className="w-full rounded-xl bg-gray-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:bg-white focus:ring-2 focus:ring-[#E07A5F]/20"
               />
 
             </div>
 
-
-            {/* City */}
-            <div className="relative">
-
-              <MapPin
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-
-              <select
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="h-12 w-full min-w-[170px] appearance-none rounded-xl border border-gray-200 bg-white pl-11 pr-8 outline-none focus:border-[#E07A5F]"
-              >
-
-                <option value="">All cities</option>
-                <option value="Goa">Goa</option>
-                <option value="New Delhi">New Delhi</option>
-                <option value="Manali">Manali</option>
-                <option value="Shimla">Shimla</option>
-                <option value="Jaipur">Jaipur</option>
-                <option value="Alleppey">Alleppey</option>
-                <option value="Udaipur">Udaipur</option>
-                <option value="Rishikesh">Rishikesh</option>
-
-              </select>
-
-            </div>
-
-
-            {/* Category */}
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="h-12 min-w-[170px] rounded-xl border border-gray-200 bg-white px-4 outline-none focus:border-[#E07A5F]"
-            >
-
-              <option value="">All types</option>
-              <option value="Villa">Villa</option>
-              <option value="Apartment">Apartment</option>
-              <option value="Cottage">Cottage</option>
-              <option value="Cabin">Cabin</option>
-              <option value="House">House</option>
-
-            </select>
-
-
-            {/* Price */}
-            <select
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              className="h-12 min-w-[170px] rounded-xl border border-gray-200 bg-white px-4 outline-none focus:border-[#E07A5F]"
-            >
-
-              <option value="">Any price</option>
-              <option value="3000">Under ₹3,000</option>
-              <option value="4000">Under ₹4,000</option>
-              <option value="5000">Under ₹5,000</option>
-              <option value="7000">Under ₹7,000</option>
-
-            </select>
-
-
-            {/* Search Button */}
             <button
               type="submit"
-              className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#1F2937] px-6 font-medium text-white transition hover:bg-[#374151]"
+              className="rounded-xl bg-[#E07A5F] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#d96c50]"
             >
-              <SlidersHorizontal size={18} />
               Search
             </button>
 
           </form>
 
+          {/* Result count */}
+          {!loading && (
+            <div className="mb-6 flex items-center justify-between">
 
-          {/* Clear */}
-          {(search || city || category || maxPrice) && (
-            <button
-              onClick={clearFilters}
-              className="mt-3 text-sm font-medium text-[#E07A5F] hover:underline"
-            >
-              Clear all filters
-            </button>
+              <p className="text-sm text-gray-500">
+                <span className="font-semibold text-gray-900">
+                  {properties.length}
+                </span>{" "}
+                {properties.length === 1 ? "stay" : "stays"} found
+              </p>
+
+            </div>
           )}
 
-        </div>
+          {/* Loading */}
+          {loading && (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
-      </section>
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <div
+                  key={item}
+                  className="animate-pulse"
+                >
+                  <div className="aspect-[4/3] rounded-2xl bg-gray-200" />
 
+                  <div className="mt-4 h-4 w-3/4 rounded bg-gray-200" />
 
-      {/* Results */}
-      <section className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+                  <div className="mt-2 h-4 w-1/2 rounded bg-gray-200" />
 
-        <div className="mb-8">
+                  <div className="mt-3 h-4 w-1/3 rounded bg-gray-200" />
+                </div>
+              ))}
 
-          <h2 className="text-2xl font-bold text-gray-900">
-            {loading
-              ? "Finding stays..."
-              : `${properties.length} stays found`}
-          </h2>
+            </div>
+          )}
 
-          <p className="mt-1 text-gray-500">
-            Discover places you'll love.
-          </p>
+          {/* Empty */}
+          {!loading && properties.length === 0 && (
+            <div className="rounded-3xl border border-gray-100 bg-white px-6 py-20 text-center">
 
-        </div>
-
-
-        {/* Loading */}
-        {loading && (
-          <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-
-            {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="animate-pulse">
-
-                <div className="h-64 rounded-2xl bg-gray-200" />
-
-                <div className="mt-4 h-4 w-3/4 rounded bg-gray-200" />
-
-                <div className="mt-2 h-4 w-1/2 rounded bg-gray-200" />
-
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#F4EFEA]">
+                <Search className="text-[#E07A5F]" size={24} />
               </div>
-            ))}
 
-          </div>
-        )}
+              <h2 className="mt-5 text-xl font-semibold text-gray-900">
+                No stays found
+              </h2>
 
+              <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
+                Try changing your search or removing some filters.
+              </p>
 
-        {/* Results */}
-        {!loading && properties.length > 0 && (
-          <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+              <button
+                onClick={clearFilters}
+                className="mt-5 rounded-full bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white"
+              >
+                Clear filters
+              </button>
 
-            {properties.map((property) => (
-              <PropertyCard
-                key={property._id}
-                {...property}
-              />
-            ))}
+            </div>
+          )}
 
-          </div>
-        )}
+          {/* Properties */}
+          {!loading && properties.length > 0 && (
+            <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
 
+              {properties.map((property) => (
+                <PropertyCard
+                  key={property._id}
+                  {...property}
+                />
+              ))}
 
-        {/* No results */}
-        {!loading && properties.length === 0 && (
-          <div className="rounded-3xl bg-gray-50 px-6 py-20 text-center">
+            </div>
+          )}
 
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
-              <Search className="text-gray-400" />
+        </section>
+
+      </div>
+
+      {/* Mobile Filter Drawer */}
+      {mobileFilters && (
+        <div className="fixed inset-0 z-[100] md:hidden">
+
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMobileFilters(false)}
+          />
+
+          <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-6">
+
+            <div className="flex items-center justify-between">
+
+              <h2 className="text-lg font-semibold text-gray-900">
+                Filters
+              </h2>
+
+              <button
+                onClick={() => setMobileFilters(false)}
+                className="rounded-full p-2 hover:bg-gray-100"
+              >
+                <X size={20} />
+              </button>
+
             </div>
 
-            <h3 className="mt-5 text-xl font-semibold text-gray-900">
-              No stays found
-            </h3>
-
-            <p className="mt-2 text-gray-500">
-              Try changing your search or filters.
-            </p>
+            <FilterContent
+              filters={filters}
+              handleChange={handleChange}
+            />
 
             <button
-              onClick={clearFilters}
-              className="mt-6 rounded-full bg-[#E07A5F] px-6 py-3 text-sm font-medium text-white hover:bg-[#d9684b]"
+              onClick={() => {
+                setMobileFilters(false);
+                fetchProperties();
+              }}
+              className="mt-6 w-full rounded-xl bg-[#1F2937] px-4 py-3 font-semibold text-white"
             >
-              Clear filters
+              Apply filters
             </button>
 
           </div>
-        )}
 
-      </section>
+        </div>
+      )}
 
     </main>
+  );
+}
+
+function FilterContent({ filters, handleChange }) {
+  return (
+    <div className="mt-6 space-y-5">
+
+      <div>
+        <label className="mb-2 block text-sm font-medium text-gray-700">
+          City
+        </label>
+
+        <input
+          name="city"
+          value={filters.city}
+          onChange={handleChange}
+          placeholder="e.g. Goa"
+          className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#E07A5F]"
+        />
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm font-medium text-gray-700">
+          Category
+        </label>
+
+        <select
+          name="category"
+          value={filters.category}
+          onChange={handleChange}
+          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#E07A5F]"
+        >
+          <option value="">All categories</option>
+          <option value="Villa">Villa</option>
+          <option value="Cabin">Cabin</option>
+          <option value="Apartment">Apartment</option>
+          <option value="House">House</option>
+          <option value="Cottage">Cottage</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm font-medium text-gray-700">
+          Price per night
+        </label>
+
+        <div className="grid grid-cols-2 gap-2">
+
+          <input
+            type="number"
+            name="minPrice"
+            value={filters.minPrice}
+            onChange={handleChange}
+            placeholder="Min ₹"
+            className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#E07A5F]"
+          />
+
+          <input
+            type="number"
+            name="maxPrice"
+            value={filters.maxPrice}
+            onChange={handleChange}
+            placeholder="Max ₹"
+            className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#E07A5F]"
+          />
+
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm font-medium text-gray-700">
+          Guests
+        </label>
+
+        <select
+          name="guests"
+          value={filters.guests}
+          onChange={handleChange}
+          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#E07A5F]"
+        >
+          <option value="">Any number</option>
+          <option value="1">1+ guests</option>
+          <option value="2">2+ guests</option>
+          <option value="4">4+ guests</option>
+          <option value="6">6+ guests</option>
+          <option value="8">8+ guests</option>
+        </select>
+      </div>
+
+    </div>
   );
 }
 

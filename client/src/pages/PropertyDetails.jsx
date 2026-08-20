@@ -8,8 +8,7 @@ import {
   Users,
   BedDouble,
   Bath,
-  Wifi,
-  Check,
+  Home,
 } from "lucide-react";
 import api from "../api/axios";
 
@@ -23,37 +22,28 @@ function PropertyDetails() {
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        setLoading(true);
-
         const response = await api.get(`/properties/${id}`);
-
-        console.log("PROPERTY DETAILS:", response.data);
-
         setProperty(response.data.property);
       } catch (err) {
-        console.error("Property details error:", err);
-
+        console.error(err);
         setError(
-          err.response?.data?.message || "Unable to load property."
+          err.response?.data?.message || "Property not found"
         );
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) {
-      fetchProperty();
-    }
+    fetchProperty();
   }, [id]);
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="animate-pulse">
-          <div className="h-[450px] rounded-3xl bg-gray-200" />
-
+      <main className="min-h-screen bg-[#FAFAF8] px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl animate-pulse">
+          <div className="h-6 w-32 rounded bg-gray-200" />
+          <div className="mt-8 h-[400px] rounded-3xl bg-gray-200" />
           <div className="mt-8 h-8 w-2/3 rounded bg-gray-200" />
-
           <div className="mt-4 h-5 w-1/3 rounded bg-gray-200" />
         </div>
       </main>
@@ -62,172 +52,141 @@ function PropertyDetails() {
 
   if (error || !property) {
     return (
-      <main className="flex min-h-[70vh] items-center justify-center px-6">
+      <main className="flex min-h-[70vh] items-center justify-center px-4">
         <div className="text-center">
-          <div className="text-6xl">🏡</div>
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500">
+            !
+          </div>
 
           <h1 className="mt-5 text-2xl font-bold text-gray-900">
             Property not found
           </h1>
 
           <p className="mt-2 text-gray-500">
-            {error || "This property may no longer be available."}
+            This property may have been removed or doesn't exist.
           </p>
 
           <Link
-            to="/"
-            className="mt-6 inline-flex rounded-full bg-[#E07A5F] px-6 py-3 font-medium text-white transition hover:bg-[#cf6b51]"
+            to="/explore"
+            className="mt-6 inline-flex rounded-full bg-[#1F2937] px-6 py-3 text-sm font-semibold text-white"
           >
-            Back to home
+            Back to Explore
           </Link>
         </div>
       </main>
     );
   }
 
-  const propertyImage =
+  const image =
     property.image ||
-    (property.images?.length > 0 ? property.images[0] : "");
+    property.images?.[0] ||
+    "";
 
   return (
-    <main className="bg-white">
+    <main className="min-h-screen bg-[#FAFAF8]">
 
-      {/* Back */}
-      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+      {/* Top */}
+      <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+
         <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-900"
+          to="/explore"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-[#E07A5F]"
         >
           <ArrowLeft size={18} />
-          Back to stays
+          Back to Explore
         </Link>
-      </div>
 
-      {/* Main content */}
-      <section className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
+        {/* Title */}
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
-        {/* Image */}
-        <div className="relative overflow-hidden rounded-3xl bg-gray-100">
+          <div>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
 
-          {propertyImage ? (
-            <img
-              src={propertyImage}
-              alt={property.title}
-              className="h-[300px] w-full object-cover sm:h-[400px] lg:h-[520px]"
-            />
-          ) : (
-            <div className="flex h-[300px] items-center justify-center text-gray-400 sm:h-[400px] lg:h-[520px]">
-              No image available
+              {property.category && (
+                <span className="rounded-full bg-[#F4EFEA] px-3 py-1 text-xs font-semibold text-[#E07A5F]">
+                  {property.category}
+                </span>
+              )}
+
+              {property.rating && (
+                <span className="flex items-center gap-1 text-sm font-medium">
+                  <Star size={15} fill="currentColor" />
+                  {property.rating}
+                </span>
+              )}
             </div>
-          )}
+
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
+              {property.title}
+            </h1>
+
+            <div className="mt-3 flex items-center gap-2 text-gray-500">
+              <MapPin size={17} />
+              <span>
+                {property.location}, {property.city}, {property.country}
+              </span>
+            </div>
+          </div>
 
           <button
             type="button"
-            className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-md transition hover:scale-105"
+            className="flex w-fit items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium shadow-sm transition hover:bg-gray-50"
           >
-            <Heart size={20} />
+            <Heart size={18} />
+            Save
           </button>
 
         </div>
+      </section>
 
-        {/* Details */}
-        <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_380px]">
+      {/* Image */}
+      <section className="mx-auto mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        <div className="overflow-hidden rounded-3xl bg-gray-100">
+          {image ? (
+            <img
+              src={image}
+              alt={property.title}
+              className="h-[280px] w-full object-cover sm:h-[400px] lg:h-[520px]"
+            />
+          ) : (
+            <div className="flex h-[400px] items-center justify-center text-gray-400">
+              No image available
+            </div>
+          )}
+        </div>
+
+      </section>
+
+      {/* Content */}
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+
+        <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
 
           {/* Left */}
           <div>
 
-            {/* Category */}
-            {property.category && (
-              <span className="inline-flex rounded-full bg-[#F4EFEA] px-4 py-2 text-sm font-semibold text-[#E07A5F]">
-                {property.category}
-              </span>
-            )}
+            {/* Host */}
+            <div className="border-b border-gray-200 pb-7">
 
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
-              {property.title}
-            </h1>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {property.guests} guests · {property.bedrooms} bedrooms ·{" "}
+                {property.beds} beds · {property.bathrooms} bathrooms
+              </h2>
 
-            {/* Location + Rating */}
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
-
-              <div className="flex items-center gap-1.5">
-                <MapPin size={17} />
-                <span>
-                  {property.location}, {property.city}, {property.country}
+              <p className="mt-2 text-gray-500">
+                Entire {property.category || "property"} hosted by{" "}
+                <span className="font-medium text-gray-900">
+                  {property.host?.name || "StayNest Host"}
                 </span>
-              </div>
-
-              {property.rating && (
-                <div className="flex items-center gap-1">
-                  <Star
-                    size={16}
-                    fill="currentColor"
-                  />
-                  <span className="font-semibold text-gray-900">
-                    {property.rating}
-                  </span>
-
-                  {property.reviews && (
-                    <span>
-                      ({property.reviews} reviews)
-                    </span>
-                  )}
-                </div>
-              )}
-
-            </div>
-
-            <div className="my-8 border-t border-gray-200" />
-
-            {/* Property stats */}
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-
-              <div className="rounded-2xl bg-gray-50 p-5">
-                <Users size={20} />
-                <p className="mt-3 text-sm text-gray-500">
-                  Guests
-                </p>
-                <p className="font-semibold">
-                  {property.guests}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-gray-50 p-5">
-                <BedDouble size={20} />
-                <p className="mt-3 text-sm text-gray-500">
-                  Bedrooms
-                </p>
-                <p className="font-semibold">
-                  {property.bedrooms}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-gray-50 p-5">
-                <BedDouble size={20} />
-                <p className="mt-3 text-sm text-gray-500">
-                  Beds
-                </p>
-                <p className="font-semibold">
-                  {property.beds}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-gray-50 p-5">
-                <Bath size={20} />
-                <p className="mt-3 text-sm text-gray-500">
-                  Bathrooms
-                </p>
-                <p className="font-semibold">
-                  {property.bathrooms}
-                </p>
-              </div>
+              </p>
 
             </div>
 
             {/* Description */}
-            <div className="mt-10">
+            <div className="border-b border-gray-200 py-8">
 
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-gray-900">
                 About this place
               </h2>
 
@@ -237,27 +196,60 @@ function PropertyDetails() {
 
             </div>
 
+            {/* Features */}
+            <div className="border-b border-gray-200 py-8">
+
+              <h2 className="text-xl font-bold text-gray-900">
+                Property features
+              </h2>
+
+              <div className="mt-6 grid gap-5 sm:grid-cols-2">
+
+                <Feature
+                  icon={<Users size={22} />}
+                  title={`${property.guests} guests`}
+                  text="Maximum guests"
+                />
+
+                <Feature
+                  icon={<BedDouble size={22} />}
+                  title={`${property.beds} beds`}
+                  text={`${property.bedrooms} bedrooms`}
+                />
+
+                <Feature
+                  icon={<Bath size={22} />}
+                  title={`${property.bathrooms} bathrooms`}
+                  text="Available"
+                />
+
+                <Feature
+                  icon={<Home size={22} />}
+                  title={property.category || "Property"}
+                  text="Entire place"
+                />
+
+              </div>
+
+            </div>
+
             {/* Amenities */}
             {property.amenities?.length > 0 && (
-              <div className="mt-10">
+              <div className="py-8">
 
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-xl font-bold text-gray-900">
                   What this place offers
                 </h2>
 
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div className="mt-5 flex flex-wrap gap-3">
 
                   {property.amenities.map((amenity, index) => (
-                    <div
+                    <span
                       key={index}
-                      className="flex items-center gap-3 text-gray-700"
+                      className="rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700"
                     >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F4EFEA]">
-                        <Check size={16} />
-                      </div>
-
                       {amenity}
-                    </div>
+                    </span>
                   ))}
 
                 </div>
@@ -268,18 +260,18 @@ function PropertyDetails() {
           </div>
 
           {/* Booking Card */}
-          <aside className="lg:sticky lg:top-28 lg:h-fit">
+          <aside>
 
-            <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-xl">
+            <div className="sticky top-28 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg">
 
               <div className="flex items-end justify-between">
 
                 <div>
-                  <span className="text-3xl font-bold text-gray-900">
+                  <span className="text-2xl font-bold text-gray-900">
                     ₹{Number(property.price).toLocaleString("en-IN")}
                   </span>
 
-                  <span className="ml-1 text-gray-500">
+                  <span className="ml-1 text-sm text-gray-500">
                     / night
                   </span>
                 </div>
@@ -287,7 +279,9 @@ function PropertyDetails() {
                 {property.rating && (
                   <div className="flex items-center gap-1 text-sm">
                     <Star size={15} fill="currentColor" />
-                    {property.rating}
+                    <span className="font-semibold">
+                      {property.rating}
+                    </span>
                   </div>
                 )}
 
@@ -295,22 +289,20 @@ function PropertyDetails() {
 
               <div className="mt-6 grid grid-cols-2 overflow-hidden rounded-xl border border-gray-200">
 
-                <div className="border-r border-gray-200 p-4">
+                <div className="border-r border-gray-200 p-3">
                   <p className="text-xs font-semibold uppercase text-gray-500">
                     Check in
                   </p>
-
-                  <p className="mt-1 text-sm font-medium">
+                  <p className="mt-1 text-sm text-gray-800">
                     Add date
                   </p>
                 </div>
 
-                <div className="p-4">
+                <div className="p-3">
                   <p className="text-xs font-semibold uppercase text-gray-500">
                     Check out
                   </p>
-
-                  <p className="mt-1 text-sm font-medium">
+                  <p className="mt-1 text-sm text-gray-800">
                     Add date
                   </p>
                 </div>
@@ -319,7 +311,7 @@ function PropertyDetails() {
 
               <button
                 type="button"
-                className="mt-5 w-full rounded-xl bg-[#E07A5F] py-4 font-semibold text-white transition hover:bg-[#cf6b51]"
+                className="mt-5 w-full rounded-xl bg-[#E07A5F] px-5 py-3.5 font-semibold text-white transition hover:bg-[#d9684d]"
               >
                 Reserve
               </button>
@@ -327,6 +319,28 @@ function PropertyDetails() {
               <p className="mt-4 text-center text-xs text-gray-500">
                 You won't be charged yet
               </p>
+
+              <div className="mt-6 border-t border-gray-100 pt-5 text-sm">
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">
+                    ₹{Number(property.price).toLocaleString("en-IN")} × 1 night
+                  </span>
+
+                  <span>
+                    ₹{Number(property.price).toLocaleString("en-IN")}
+                  </span>
+                </div>
+
+                <div className="mt-4 flex justify-between border-t border-gray-100 pt-4 font-semibold">
+                  <span>Total</span>
+
+                  <span>
+                    ₹{Number(property.price).toLocaleString("en-IN")}
+                  </span>
+                </div>
+
+              </div>
 
             </div>
 
@@ -337,6 +351,28 @@ function PropertyDetails() {
       </section>
 
     </main>
+  );
+}
+
+function Feature({ icon, title, text }) {
+  return (
+    <div className="flex items-center gap-4">
+
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F4EFEA] text-[#E07A5F]">
+        {icon}
+      </div>
+
+      <div>
+        <p className="font-medium text-gray-900">
+          {title}
+        </p>
+
+        <p className="text-sm text-gray-500">
+          {text}
+        </p>
+      </div>
+
+    </div>
   );
 }
 
