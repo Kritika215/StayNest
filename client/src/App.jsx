@@ -8,6 +8,7 @@ import PropertyDetails from "./pages/PropertyDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CreateProperty from "./pages/CreateProperty";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -38,7 +39,9 @@ function App() {
           path="/create-property"
           element={<CreateProperty />}
         />
+        
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

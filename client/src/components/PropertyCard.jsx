@@ -12,129 +12,125 @@ function PropertyCard({
   category,
   guests,
 }) {
-  console.log("PROPERTY:", {
-    id: _id,
-    title,
-  });
-  
   const propertyImage =
-    image || (images && images.length > 0 ? images[0] : "");
+    image || (images?.length > 0 ? images[0] : "");
 
   return (
-    <article className="group w-full">
+    <article className="group min-w-0">
 
-      {/* Image */}
-      <Link
-        to={`/property/${_id}`}
-        className="relative block overflow-hidden rounded-2xl bg-gray-100"
-      >
+      {/* IMAGE */}
+      <div className="relative">
 
-        <div className="aspect-[4/3] w-full overflow-hidden">
+        <Link
+          to={`/property/${_id}`}
+          className="block overflow-hidden rounded-2xl bg-gray-100"
+        >
+          <div className="aspect-[4/3] w-full">
 
-          {propertyImage ? (
-            <img
-              src={propertyImage}
-              alt={title}
-              className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
-              loading="lazy"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-gray-400">
-              No image
-            </div>
-          )}
+            {propertyImage ? (
+              <img
+                src={propertyImage}
+                alt={title || "Property"}
+                className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.04]"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-gray-400">
+                No image available
+              </div>
+            )}
 
-        </div>
+          </div>
+        </Link>
 
+        {/* CATEGORY */}
+        {category && (
+          <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-gray-800 shadow-sm backdrop-blur">
+            {category}
+          </span>
+        )}
 
-        {/* Wishlist */}
+        {/* WISHLIST */}
         <button
           type="button"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
           }}
-          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-sm backdrop-blur transition hover:scale-105 hover:bg-white"
+          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-sm backdrop-blur transition hover:scale-105 hover:bg-white"
           aria-label="Add to wishlist"
         >
-          <Heart
-            size={19}
-            strokeWidth={2}
-          />
+          <Heart size={17} strokeWidth={2} />
         </button>
 
-
-        {/* Category */}
-        {category && (
-          <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-gray-800 shadow-sm">
-            {category}
-          </span>
-        )}
-
-      </Link>
+      </div>
 
 
-      {/* Information */}
-      <div className="pt-4">
+      {/* CONTENT */}
+      <div className="pt-3">
 
+        {/* TITLE + RATING */}
         <div className="flex items-start justify-between gap-3">
 
           <Link
             to={`/property/${_id}`}
-            className="min-w-0"
+            className="min-w-0 flex-1"
           >
-
-            <h3 className="truncate text-base font-semibold text-gray-900 transition group-hover:text-[#E07A5F]">
-              {title}
+            <h3 className="truncate text-[15px] font-semibold leading-5 text-gray-900 transition group-hover:text-[#E07A5F]">
+              {title || "Untitled property"}
             </h3>
-
           </Link>
 
-
-          {rating && (
-            <div className="flex shrink-0 items-center gap-1 text-sm font-medium text-gray-900">
-
+          {rating !== undefined && rating !== null && (
+            <div className="flex shrink-0 items-center gap-1 text-xs font-medium text-gray-800">
               <Star
-                size={15}
+                size={13}
                 fill="currentColor"
+                strokeWidth={1.5}
               />
 
-              <span>{rating}</span>
-
+              <span>
+                {Number(rating).toFixed(1)}
+              </span>
             </div>
           )}
 
         </div>
 
 
-        {/* Location */}
-        <div className="mt-1.5 flex items-center gap-1.5 text-sm text-gray-500">
+        {/* LOCATION */}
+        {location && (
+          <div className="mt-1 flex items-center gap-1 text-sm text-gray-500">
 
-          <MapPin size={14} />
+            <MapPin
+              size={13}
+              className="shrink-0"
+            />
 
-          <span className="truncate">
-            {location}
-          </span>
+            <span className="truncate">
+              {location}
+            </span>
 
-        </div>
+          </div>
+        )}
 
 
-        {/* Guests */}
+        {/* GUESTS */}
         {guests && (
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-xs text-gray-500">
             {guests} guests
           </p>
         )}
 
 
-        {/* Price */}
-        <div className="mt-3">
+        {/* PRICE */}
+        <div className="mt-2.5 flex items-baseline">
 
-          <span className="text-base font-semibold text-gray-900">
-            ₹{Number(price).toLocaleString("en-IN")}
+          <span className="text-[15px] font-semibold text-gray-900">
+            ₹{Number(price || 0).toLocaleString("en-IN")}
           </span>
 
-          <span className="ml-1 text-sm text-gray-500">
+          <span className="ml-1 text-xs text-gray-500">
             night
           </span>
 

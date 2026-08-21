@@ -1,204 +1,150 @@
 import { useState } from "react";
-import { Menu, Heart, UserRound, X } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Heart, Menu, X, UserCircle } from "lucide-react";
+import { Link, NavLink } from "react-router-dom";
 
 function Navbar() {
-  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const token = localStorage.getItem("token");
-
-  const user = JSON.parse(
-    localStorage.getItem("user") || "null"
-  );
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    setMobileOpen(false);
-
-    navigate("/login");
-  };
+  const navClass = ({ isActive }) =>
+    `text-sm font-medium transition ${
+      isActive
+        ? "text-[#E07A5F]"
+        : "text-gray-600 hover:text-gray-900"
+    }`;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-6 lg:px-8">
-
-        {/* Logo */}
+        {/* LOGO */}
         <Link
           to="/"
-          className="flex items-center gap-2"
+          onClick={() => setOpen(false)}
+          className="text-xl font-bold tracking-tight text-gray-900"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E07A5F] text-white">
-            <span className="text-lg font-bold">
-              S
-            </span>
-          </div>
-
-          <span className="text-xl font-bold tracking-tight text-[#1F2937] sm:text-2xl">
-            StayNest
-          </span>
+          Stay<span className="text-[#E07A5F]">Nest</span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden items-center gap-7 md:flex">
 
-          <Link
-            to="/"
-            className="text-sm font-medium text-gray-700 transition hover:text-[#E07A5F]"
-          >
+        {/* DESKTOP NAV */}
+        <div className="hidden items-center gap-8 md:flex">
+
+          <NavLink to="/" className={navClass}>
             Home
-          </Link>
+          </NavLink>
 
-          <Link
-            to="/explore"
-            className="text-sm font-medium text-gray-700 transition hover:text-[#E07A5F]"
-          >
+          <NavLink to="/explore" className={navClass}>
             Explore
-          </Link>
+          </NavLink>
 
           <Link
-            to="/"
-            className="text-sm font-medium text-gray-700 transition hover:text-[#E07A5F]"
+            to="/create-property"
+            className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
           >
-            Experiences
+            Become a host
           </Link>
-
-          {token && (
-            <Link
-              to="/create-property"
-              className="text-sm font-medium text-gray-700 transition hover:text-[#E07A5F]"
-            >
-              Become a Host
-            </Link>
-          )}
 
         </div>
 
-        {/* Desktop Actions */}
-        <div className="hidden items-center gap-2 sm:flex">
+
+        {/* DESKTOP ACTIONS */}
+        <div className="hidden items-center gap-3 md:flex">
 
           <Link
-            to="/wishlist"
-            className="rounded-full p-2.5 text-gray-700 transition hover:bg-gray-100 hover:text-[#E07A5F]"
-            aria-label="Wishlist"
+            to="/login"
+            className="flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
           >
-            <Heart size={20} />
+            <UserCircle size={18} />
+            Login
           </Link>
 
-          {token ? (
-            <>
-
-              <Link
-                to="/profile"
-                className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-2 transition hover:bg-gray-50"
-              >
-                <UserRound size={18} />
-
-                <span className="max-w-24 truncate text-sm font-medium text-gray-700">
-                  {user?.name || "Profile"}
-                </span>
-              </Link>
-
-              <button
-                onClick={handleLogout}
-                className="rounded-full bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
-              >
-                Logout
-              </button>
-
-            </>
-          ) : (
-            <Link
-              to="/login"
-              className="rounded-full bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
-            >
-              Sign in
-            </Link>
-          )}
+          <Link
+            to="/register"
+            className="rounded-full bg-[#E07A5F] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#d96c50]"
+          >
+            Sign up
+          </Link>
 
         </div>
 
-        {/* Mobile Menu Button */}
+
+        {/* MOBILE MENU BUTTON */}
         <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="rounded-full p-2.5 text-gray-700 transition hover:bg-gray-100 sm:hidden"
-          aria-label="Menu"
+          type="button"
+          onClick={() => setOpen(!open)}
+          className="flex h-10 w-10 items-center justify-center rounded-full text-gray-700 transition hover:bg-gray-100 md:hidden"
+          aria-label="Toggle menu"
         >
-          {mobileOpen ? (
-            <X size={24} />
-          ) : (
-            <Menu size={24} />
-          )}
+          {open ? <X size={22} /> : <Menu size={22} />}
         </button>
 
       </nav>
 
-      {/* Mobile Menu */}
-      {mobileOpen && (
-        <div className="border-t border-gray-100 bg-white px-4 py-5 sm:hidden">
 
-          <div className="flex flex-col gap-1">
+      {/* MOBILE MENU */}
+      {open && (
+        <div className="border-t border-gray-100 bg-white px-4 pb-5 pt-3 md:hidden">
 
-            <Link
+          <div className="flex flex-col">
+
+            <NavLink
               to="/"
-              onClick={() => setMobileOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `rounded-xl px-4 py-3 text-sm font-medium ${
+                  isActive
+                    ? "bg-[#F4EFEA] text-[#E07A5F]"
+                    : "text-gray-700"
+                }`
+              }
             >
               Home
-            </Link>
+            </NavLink>
 
-            <Link
+            <NavLink
               to="/explore"
-              onClick={() => setMobileOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `rounded-xl px-4 py-3 text-sm font-medium ${
+                  isActive
+                    ? "bg-[#F4EFEA] text-[#E07A5F]"
+                    : "text-gray-700"
+                }`
+              }
             >
               Explore
+            </NavLink>
+
+            <Link
+              to="/create-property"
+              onClick={() => setOpen(false)}
+              className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700"
+            >
+              Become a host
+            </Link>
+
+            <div className="my-2 border-t border-gray-100" />
+
+            <Link
+              to="/login"
+              onClick={() => setOpen(false)}
+              className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700"
+            >
+              Login
             </Link>
 
             <Link
-              to="/wishlist"
-              onClick={() => setMobileOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              to="/register"
+              onClick={() => setOpen(false)}
+              className="mt-2 rounded-xl bg-[#E07A5F] px-4 py-3 text-center text-sm font-semibold text-white"
             >
-              ❤️ Wishlist
+              Sign up
             </Link>
-
-            {token && (
-              <Link
-                to="/profile"
-                onClick={() => setMobileOpen(false)}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                👤 Profile
-              </Link>
-            )}
-
-            {token ? (
-              <button
-                onClick={handleLogout}
-                className="mt-2 rounded-xl bg-[#1F2937] px-4 py-3 text-left text-sm font-semibold text-white"
-              >
-                Logout
-              </button>
-            ) : (
-              <Link
-                to="/login"
-                onClick={() => setMobileOpen(false)}
-                className="mt-2 rounded-xl bg-[#1F2937] px-4 py-3 text-center text-sm font-semibold text-white"
-              >
-                Sign in
-              </Link>
-            )}
 
           </div>
 
         </div>
       )}
-
     </header>
   );
 }

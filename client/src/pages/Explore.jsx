@@ -1,21 +1,19 @@
 import { useEffect, useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Filter, Search, X } from "lucide-react";
+
 import PropertyCard from "../components/PropertyCard";
 import api from "../api/axios";
 
 function Explore() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mobileFilters, setMobileFilters] = useState(false);
 
-  const [filters, setFilters] = useState({
-    search: "",
-    city: "",
-    category: "",
-    minPrice: "",
-    maxPrice: "",
-    guests: "",
-  });
+  const [search, setSearch] = useState("");
+  const [city, setCity] = useState("");
+  const [category, setCategory] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [guests, setGuests] = useState("");
 
   const fetchProperties = async () => {
     try {
@@ -23,19 +21,19 @@ function Explore() {
 
       const params = {};
 
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) {
-          params[key] = value;
-        }
-      });
+      if (search.trim()) params.search = search.trim();
+      if (city.trim()) params.city = city.trim();
+      if (category) params.category = category;
+      if (minPrice) params.minPrice = minPrice;
+      if (maxPrice) params.maxPrice = maxPrice;
+      if (guests) params.guests = guests;
 
-      const response = await api.get("/properties", {
-        params,
-      });
+      const response = await api.get("/properties", { params });
 
       setProperties(response.data.properties || []);
     } catch (error) {
       console.error("Failed to fetch properties:", error);
+      setProperties([]);
     } finally {
       setLoading(false);
     }
@@ -45,360 +43,293 @@ function Explore() {
     fetchProperties();
   }, []);
 
-  const handleChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSearch = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     fetchProperties();
   };
 
   const clearFilters = () => {
-    setFilters({
-      search: "",
-      city: "",
-      category: "",
-      minPrice: "",
-      maxPrice: "",
-      guests: "",
-    });
+    setSearch("");
+    setCity("");
+    setCategory("");
+    setMinPrice("");
+    setMaxPrice("");
+    setGuests("");
 
     setTimeout(() => {
       fetchProperties();
     }, 0);
   };
 
+  const hasFilters =
+    search ||
+    city ||
+    category ||
+    minPrice ||
+    maxPrice ||
+    guests;
+
   return (
     <main className="min-h-screen bg-[#FAFAF8]">
 
-      {/* Header */}
+      {/* ================= HEADER ================= */}
       <section className="border-b border-gray-100 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#E07A5F]">
-            Explore
-          </p>
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
 
-          <div className="mt-2 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
 
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Find your perfect stay
-              </h1>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#E07A5F]">
+              Explore
+            </p>
 
-              <p className="mt-2 max-w-xl text-sm leading-6 text-gray-500 sm:text-base">
-                Search beautiful homes and unique stays that match your plans.
-              </p>
-            </div>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Find your perfect stay
+            </h1>
 
-            <button
-              onClick={() => setMobileFilters(true)}
-              className="flex w-fit items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm md:hidden"
-            >
-              <SlidersHorizontal size={17} />
-              Filters
-            </button>
+            <p className="mt-3 text-sm leading-6 text-gray-500 sm:text-base">
+              Search through beautiful properties and find a place
+              that feels like home.
+            </p>
 
           </div>
 
-        </div>
-      </section>
 
-      <div className="mx-auto flex max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:px-8">
-
-        {/* Desktop Filters */}
-        <aside className="hidden w-64 shrink-0 md:block">
-
-          <div className="sticky top-28 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-
-            <div className="flex items-center justify-between">
-
-              <h2 className="font-semibold text-gray-900">
-                Filters
-              </h2>
-
-              <button
-                onClick={clearFilters}
-                className="text-xs font-medium text-[#E07A5F] hover:underline"
-              >
-                Clear
-              </button>
-
-            </div>
-
-            <FilterContent
-              filters={filters}
-              handleChange={handleChange}
-            />
-
-            <button
-              onClick={handleSearch}
-              className="mt-6 w-full rounded-xl bg-[#1F2937] px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800"
-            >
-              Apply filters
-            </button>
-
-          </div>
-
-        </aside>
-
-        {/* Main */}
-        <section className="min-w-0 flex-1">
-
-          {/* Search */}
+          {/* SEARCH */}
           <form
-            onSubmit={handleSearch}
-            className="mb-8 flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:flex-row"
+            onSubmit={handleSubmit}
+            className="mt-7 flex flex-col gap-3 sm:flex-row"
           >
 
             <div className="relative flex-1">
 
               <Search
-                size={19}
+                size={18}
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
               />
 
               <input
                 type="text"
-                name="search"
-                value={filters.search}
-                onChange={handleChange}
-                placeholder="Search by destination or property..."
-                className="w-full rounded-xl bg-gray-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:bg-white focus:ring-2 focus:ring-[#E07A5F]/20"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by property, city or location..."
+                className="h-12 w-full rounded-xl border border-gray-200 bg-[#FAFAF8] pl-11 pr-4 text-sm outline-none transition placeholder:text-gray-400 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10"
               />
 
             </div>
 
             <button
               type="submit"
-              className="rounded-xl bg-[#E07A5F] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#d96c50]"
+              className="h-12 rounded-xl bg-[#E07A5F] px-6 text-sm font-semibold text-white transition hover:bg-[#d96c50]"
             >
               Search
             </button>
 
           </form>
 
-          {/* Result count */}
-          {!loading && (
-            <div className="mb-6 flex items-center justify-between">
+        </div>
 
-              <p className="text-sm text-gray-500">
-                <span className="font-semibold text-gray-900">
-                  {properties.length}
-                </span>{" "}
-                {properties.length === 1 ? "stay" : "stays"} found
-              </p>
+      </section>
 
-            </div>
+
+      {/* ================= CONTENT ================= */}
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+        {/* FILTER HEADER */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+          <div>
+            <p className="text-sm font-semibold text-gray-900">
+              {loading ? "Finding stays..." : `${properties.length} stays`}
+            </p>
+
+            <p className="mt-1 text-xs text-gray-500">
+              Refine your search using the filters below.
+            </p>
+          </div>
+
+          {hasFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="inline-flex items-center gap-1.5 self-start text-sm font-medium text-gray-500 transition hover:text-gray-900"
+            >
+              <X size={15} />
+              Clear filters
+            </button>
           )}
 
-          {/* Loading */}
-          {loading && (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        </div>
 
-              {[1, 2, 3, 4, 5, 6].map((item) => (
-                <div
-                  key={item}
-                  className="animate-pulse"
-                >
-                  <div className="aspect-[4/3] rounded-2xl bg-gray-200" />
 
-                  <div className="mt-4 h-4 w-3/4 rounded bg-gray-200" />
+        {/* ================= FILTERS ================= */}
+        <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
 
-                  <div className="mt-2 h-4 w-1/2 rounded bg-gray-200" />
+          <div className="mb-4 flex items-center gap-2">
 
-                  <div className="mt-3 h-4 w-1/3 rounded bg-gray-200" />
-                </div>
-              ))}
-
-            </div>
-          )}
-
-          {/* Empty */}
-          {!loading && properties.length === 0 && (
-            <div className="rounded-3xl border border-gray-100 bg-white px-6 py-20 text-center">
-
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#F4EFEA]">
-                <Search className="text-[#E07A5F]" size={24} />
-              </div>
-
-              <h2 className="mt-5 text-xl font-semibold text-gray-900">
-                No stays found
-              </h2>
-
-              <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
-                Try changing your search or removing some filters.
-              </p>
-
-              <button
-                onClick={clearFilters}
-                className="mt-5 rounded-full bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white"
-              >
-                Clear filters
-              </button>
-
-            </div>
-          )}
-
-          {/* Properties */}
-          {!loading && properties.length > 0 && (
-            <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-
-              {properties.map((property) => (
-                <PropertyCard
-                  key={property._id}
-                  {...property}
-                />
-              ))}
-
-            </div>
-          )}
-
-        </section>
-
-      </div>
-
-      {/* Mobile Filter Drawer */}
-      {mobileFilters && (
-        <div className="fixed inset-0 z-[100] md:hidden">
-
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setMobileFilters(false)}
-          />
-
-          <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-6">
-
-            <div className="flex items-center justify-between">
-
-              <h2 className="text-lg font-semibold text-gray-900">
-                Filters
-              </h2>
-
-              <button
-                onClick={() => setMobileFilters(false)}
-                className="rounded-full p-2 hover:bg-gray-100"
-              >
-                <X size={20} />
-              </button>
-
-            </div>
-
-            <FilterContent
-              filters={filters}
-              handleChange={handleChange}
+            <Filter
+              size={17}
+              className="text-[#E07A5F]"
             />
 
-            <button
-              onClick={() => {
-                setMobileFilters(false);
-                fetchProperties();
-              }}
-              className="mt-6 w-full rounded-xl bg-[#1F2937] px-4 py-3 font-semibold text-white"
-            >
-              Apply filters
-            </button>
+            <h2 className="text-sm font-semibold text-gray-900">
+              Filters
+            </h2>
 
           </div>
 
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+
+            {/* CITY */}
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="City"
+              className="h-11 rounded-xl border border-gray-200 px-3 text-sm outline-none focus:border-[#E07A5F]"
+            />
+
+
+            {/* CATEGORY */}
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:border-[#E07A5F]"
+            >
+              <option value="">All categories</option>
+              <option value="Apartment">Apartment</option>
+              <option value="Villa">Villa</option>
+              <option value="House">House</option>
+              <option value="Hotel">Hotel</option>
+              <option value="Cabin">Cabin</option>
+            </select>
+
+
+            {/* MIN PRICE */}
+            <input
+              type="number"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              placeholder="Min price"
+              min="0"
+              className="h-11 rounded-xl border border-gray-200 px-3 text-sm outline-none focus:border-[#E07A5F]"
+            />
+
+
+            {/* MAX PRICE */}
+            <input
+              type="number"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              placeholder="Max price"
+              min="0"
+              className="h-11 rounded-xl border border-gray-200 px-3 text-sm outline-none focus:border-[#E07A5F]"
+            />
+
+
+            {/* GUESTS */}
+            <select
+              value={guests}
+              onChange={(e) => setGuests(e.target.value)}
+              className="h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:border-[#E07A5F]"
+            >
+              <option value="">Guests</option>
+              <option value="1">1+ guest</option>
+              <option value="2">2+ guests</option>
+              <option value="4">4+ guests</option>
+              <option value="6">6+ guests</option>
+              <option value="8">8+ guests</option>
+            </select>
+
+          </div>
+
+
+          <button
+            type="button"
+            onClick={fetchProperties}
+            className="mt-4 w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:bg-gray-50 sm:w-auto"
+          >
+            Apply filters
+          </button>
+
         </div>
-      )}
+
+
+        {/* ================= LOADING ================= */}
+        {loading && (
+          <div className="mt-10 grid grid-cols-1 gap-x-5 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+              <div
+                key={item}
+                className="animate-pulse"
+              >
+                <div className="aspect-[4/3] rounded-2xl bg-gray-200" />
+
+                <div className="mt-3 h-4 w-3/4 rounded bg-gray-200" />
+
+                <div className="mt-2 h-3.5 w-1/2 rounded bg-gray-200" />
+
+                <div className="mt-2 h-3.5 w-1/3 rounded bg-gray-200" />
+              </div>
+            ))}
+
+          </div>
+        )}
+
+
+        {/* ================= RESULTS ================= */}
+        {!loading && properties.length > 0 && (
+          <div className="mt-10 grid grid-cols-1 gap-x-5 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+            {properties.map((property) => (
+              <PropertyCard
+                key={property._id}
+                {...property}
+              />
+            ))}
+
+          </div>
+        )}
+
+
+        {/* ================= EMPTY ================= */}
+        {!loading && properties.length === 0 && (
+          <div className="mt-10 rounded-3xl border border-gray-100 bg-white px-5 py-16 text-center shadow-sm">
+
+            <div className="mx-auto max-w-md">
+
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#F4EFEA] text-[#E07A5F]">
+                <Search size={22} />
+              </div>
+
+              <h2 className="mt-5 text-xl font-bold text-gray-900">
+                No stays found
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-gray-500">
+                Try changing your search or removing some filters.
+              </p>
+
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="mt-6 rounded-full bg-[#E07A5F] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#d96c50]"
+                >
+                  Clear filters
+                </button>
+              )}
+
+            </div>
+
+          </div>
+        )}
+
+      </section>
 
     </main>
-  );
-}
-
-function FilterContent({ filters, handleChange }) {
-  return (
-    <div className="mt-6 space-y-5">
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          City
-        </label>
-
-        <input
-          name="city"
-          value={filters.city}
-          onChange={handleChange}
-          placeholder="e.g. Goa"
-          className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#E07A5F]"
-        />
-      </div>
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Category
-        </label>
-
-        <select
-          name="category"
-          value={filters.category}
-          onChange={handleChange}
-          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#E07A5F]"
-        >
-          <option value="">All categories</option>
-          <option value="Villa">Villa</option>
-          <option value="Cabin">Cabin</option>
-          <option value="Apartment">Apartment</option>
-          <option value="House">House</option>
-          <option value="Cottage">Cottage</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Price per night
-        </label>
-
-        <div className="grid grid-cols-2 gap-2">
-
-          <input
-            type="number"
-            name="minPrice"
-            value={filters.minPrice}
-            onChange={handleChange}
-            placeholder="Min ₹"
-            className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#E07A5F]"
-          />
-
-          <input
-            type="number"
-            name="maxPrice"
-            value={filters.maxPrice}
-            onChange={handleChange}
-            placeholder="Max ₹"
-            className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#E07A5F]"
-          />
-
-        </div>
-      </div>
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Guests
-        </label>
-
-        <select
-          name="guests"
-          value={filters.guests}
-          onChange={handleChange}
-          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#E07A5F]"
-        >
-          <option value="">Any number</option>
-          <option value="1">1+ guests</option>
-          <option value="2">2+ guests</option>
-          <option value="4">4+ guests</option>
-          <option value="6">6+ guests</option>
-          <option value="8">8+ guests</option>
-        </select>
-      </div>
-
-    </div>
   );
 }
 

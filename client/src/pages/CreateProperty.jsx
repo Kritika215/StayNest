@@ -1,312 +1,377 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Plus, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
 function CreateProperty() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     title: "",
     description: "",
     location: "",
     city: "",
     country: "",
     price: "",
-    rating: "",
-    reviews: "",
+    category: "",
     guests: "",
     bedrooms: "",
     beds: "",
     bathrooms: "",
-    category: "",
+    rating: "",
+    reviews: "",
     image: "",
-    amenities: "",
   });
+
+  const [amenity, setAmenity] = useState("");
+  const [amenities, setAmenities] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setForm({
+      ...form,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const addAmenity = () => {
+    const value = amenity.trim();
+
+    if (!value) return;
+
+    if (!amenities.includes(value)) {
+      setAmenities([...amenities, value]);
+    }
+
+    setAmenity("");
+  };
+
+  const removeAmenity = (value) => {
+    setAmenities(amenities.filter((item) => item !== value));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setError("");
-    setLoading(true);
-
     try {
-      const propertyData = {
-        ...formData,
-        price: Number(formData.price),
-        rating: formData.rating ? Number(formData.rating) : 0,
-        reviews: formData.reviews ? Number(formData.reviews) : 0,
-        guests: Number(formData.guests),
-        bedrooms: Number(formData.bedrooms),
-        beds: Number(formData.beds),
-        bathrooms: Number(formData.bathrooms),
+      setLoading(true);
+      setError("");
 
-        amenities: formData.amenities
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean),
+      const payload = {
+        ...form,
+        price: Number(form.price),
+        guests: Number(form.guests),
+        bedrooms: Number(form.bedrooms),
+        beds: Number(form.beds),
+        bathrooms: Number(form.bathrooms),
+        rating: form.rating ? Number(form.rating) : 0,
+        reviews: form.reviews ? Number(form.reviews) : 0,
+        amenities,
       };
 
-      const response = await api.post(
-        "/properties",
-        propertyData
-      );
+      const response = await api.post("/properties", payload);
 
-      console.log("Property created:", response.data);
+      const createdProperty = response.data.property;
 
-      navigate(`/property/${response.data.property._id}`);
-
+      navigate(`/property/${createdProperty._id}`);
     } catch (error) {
       console.error("Create property error:", error);
 
       setError(
         error.response?.data?.message ||
-        "Failed to create property."
+          "Unable to create property."
       );
     } finally {
       setLoading(false);
     }
   };
 
+  const inputClass =
+    "mt-2 h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10";
+
   return (
-    <main className="min-h-screen bg-[#FAFAF8] px-4 py-10 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#FAFAF8]">
 
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
 
-        {/* Header */}
-        <div className="mb-8">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900"
+        >
+          <ArrowLeft size={16} />
+          Back
+        </Link>
 
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#E07A5F]">
+
+        <div className="mt-7">
+
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#E07A5F]">
             Become a host
           </p>
 
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            List your property
+            Add your property
           </h1>
 
-          <p className="mt-3 text-gray-500">
-            Share your place with guests looking for their next stay.
+          <p className="mt-3 max-w-xl text-sm leading-6 text-gray-500">
+            Share your space with travelers looking for their next
+            memorable stay.
           </p>
 
         </div>
 
-        {/* Form */}
+
         <form
           onSubmit={handleSubmit}
-          className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-gray-100 sm:p-8"
+          className="mt-8 space-y-6"
         >
 
+          {/* BASIC INFO */}
+          <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-7">
+
+            <h2 className="text-lg font-bold text-gray-900">
+              Basic information
+            </h2>
+
+            <div className="mt-6 grid gap-5">
+
+              <label className="text-sm font-medium text-gray-700">
+                Property title
+
+                <input
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  placeholder="Beautiful beach house"
+                  required
+                  className={inputClass}
+                />
+              </label>
+
+              <label className="text-sm font-medium text-gray-700">
+                Description
+
+                <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  placeholder="Tell guests about your property..."
+                  rows={5}
+                  required
+                  className="mt-2 w-full resize-none rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10"
+                />
+              </label>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+
+                <label className="text-sm font-medium text-gray-700">
+                  Category
+
+                  <select
+                    name="category"
+                    value={form.category}
+                    onChange={handleChange}
+                    required
+                    className={inputClass}
+                  >
+                    <option value="">Select category</option>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Villa">Villa</option>
+                    <option value="House">House</option>
+                    <option value="Hotel">Hotel</option>
+                    <option value="Cabin">Cabin</option>
+                  </select>
+                </label>
+
+                <label className="text-sm font-medium text-gray-700">
+                  Price per night
+
+                  <input
+                    name="price"
+                    type="number"
+                    min="0"
+                    value={form.price}
+                    onChange={handleChange}
+                    placeholder="2500"
+                    required
+                    className={inputClass}
+                  />
+                </label>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          {/* LOCATION */}
+          <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-7">
+
+            <h2 className="text-lg font-bold text-gray-900">
+              Location
+            </h2>
+
+            <div className="mt-6 grid gap-5 sm:grid-cols-2">
+
+              {["location", "city", "country"].map((field) => (
+                <label
+                  key={field}
+                  className="text-sm font-medium capitalize text-gray-700"
+                >
+                  {field}
+
+                  <input
+                    name={field}
+                    value={form[field]}
+                    onChange={handleChange}
+                    placeholder={`Enter ${field}`}
+                    required
+                    className={inputClass}
+                  />
+                </label>
+              ))}
+
+            </div>
+
+          </section>
+
+
+          {/* DETAILS */}
+          <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-7">
+
+            <h2 className="text-lg font-bold text-gray-900">
+              Property details
+            </h2>
+
+            <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+
+              {[
+                ["guests", "Guests"],
+                ["bedrooms", "Bedrooms"],
+                ["beds", "Beds"],
+                ["bathrooms", "Bathrooms"],
+              ].map(([name, label]) => (
+                <label
+                  key={name}
+                  className="text-sm font-medium text-gray-700"
+                >
+                  {label}
+
+                  <input
+                    name={name}
+                    type="number"
+                    min="1"
+                    value={form[name]}
+                    onChange={handleChange}
+                    required
+                    className={inputClass}
+                  />
+                </label>
+              ))}
+
+            </div>
+
+          </section>
+
+
+          {/* IMAGE */}
+          <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-7">
+
+            <h2 className="text-lg font-bold text-gray-900">
+              Property image
+            </h2>
+
+            <label className="mt-6 block text-sm font-medium text-gray-700">
+              Image URL
+
+              <input
+                name="image"
+                value={form.image}
+                onChange={handleChange}
+                placeholder="https://example.com/property.jpg"
+                className={inputClass}
+              />
+            </label>
+
+          </section>
+
+
+          {/* AMENITIES */}
+          <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-7">
+
+            <h2 className="text-lg font-bold text-gray-900">
+              Amenities
+            </h2>
+
+            <div className="mt-5 flex gap-2">
+
+              <input
+                value={amenity}
+                onChange={(e) => setAmenity(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addAmenity();
+                  }
+                }}
+                placeholder="WiFi, Pool, Parking..."
+                className="h-11 min-w-0 flex-1 rounded-xl border border-gray-200 px-3 text-sm outline-none focus:border-[#E07A5F]"
+              />
+
+              <button
+                type="button"
+                onClick={addAmenity}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F4EFEA] text-[#E07A5F]"
+              >
+                <Plus size={18} />
+              </button>
+
+            </div>
+
+            {amenities.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+
+                {amenities.map((item) => (
+                  <span
+                    key={item}
+                    className="inline-flex items-center gap-1 rounded-full bg-[#F4EFEA] px-3 py-1.5 text-xs font-medium text-gray-700"
+                  >
+                    {item}
+
+                    <button
+                      type="button"
+                      onClick={() => removeAmenity(item)}
+                      className="text-gray-400 hover:text-gray-700"
+                    >
+                      <X size={13} />
+                    </button>
+                  </span>
+                ))}
+
+              </div>
+            )}
+
+          </section>
+
+
+          {/* ERROR */}
           {error && (
-            <div className="mb-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}
             </div>
           )}
 
-          {/* Basic Information */}
-          <FormSection title="Basic information">
 
-            <Input
-              label="Property title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Beautiful villa near the beach"
-              required
-            />
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Description
-              </label>
-
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows="5"
-                required
-                placeholder="Tell guests what makes your property special..."
-                className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/20"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Category
-              </label>
-
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                required
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-[#E07A5F]"
-              >
-                <option value="">Select category</option>
-                <option value="Villa">Villa</option>
-                <option value="Apartment">Apartment</option>
-                <option value="House">House</option>
-                <option value="Cabin">Cabin</option>
-                <option value="Cottage">Cottage</option>
-              </select>
-            </div>
-
-          </FormSection>
-
-          {/* Location */}
-          <FormSection title="Location">
-
-            <Input
-              label="Location"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              placeholder="Baga Beach"
-              required
-            />
-
-            <div className="grid gap-5 sm:grid-cols-2">
-
-              <Input
-                label="City"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                placeholder="Goa"
-                required
-              />
-
-              <Input
-                label="Country"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-                placeholder="India"
-                required
-              />
-
-            </div>
-
-          </FormSection>
-
-          {/* Property Details */}
-          <FormSection title="Property details">
-
-            <div className="grid gap-5 sm:grid-cols-2">
-
-              <Input
-                label="Price per night (₹)"
-                name="price"
-                type="number"
-                value={formData.price}
-                onChange={handleChange}
-                placeholder="5000"
-                required
-              />
-
-              <Input
-                label="Guests"
-                name="guests"
-                type="number"
-                min="1"
-                value={formData.guests}
-                onChange={handleChange}
-                placeholder="4"
-                required
-              />
-
-              <Input
-                label="Bedrooms"
-                name="bedrooms"
-                type="number"
-                min="1"
-                value={formData.bedrooms}
-                onChange={handleChange}
-                placeholder="2"
-                required
-              />
-
-              <Input
-                label="Beds"
-                name="beds"
-                type="number"
-                min="1"
-                value={formData.beds}
-                onChange={handleChange}
-                placeholder="3"
-                required
-              />
-
-              <Input
-                label="Bathrooms"
-                name="bathrooms"
-                type="number"
-                min="1"
-                value={formData.bathrooms}
-                onChange={handleChange}
-                placeholder="2"
-                required
-              />
-
-            </div>
-
-          </FormSection>
-
-          {/* Image */}
-          <FormSection title="Property image">
-
-            <Input
-              label="Image URL"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              placeholder="https://example.com/property.jpg"
-              required
-            />
-
-            {formData.image && (
-              <img
-                src={formData.image}
-                alt="Property preview"
-                className="h-56 w-full rounded-2xl object-cover"
-              />
-            )}
-
-          </FormSection>
-
-          {/* Amenities */}
-          <FormSection title="Amenities">
-
-            <Input
-              label="Amenities"
-              name="amenities"
-              value={formData.amenities}
-              onChange={handleChange}
-              placeholder="WiFi, Pool, Parking, AC"
-            />
-
-            <p className="text-xs text-gray-400">
-              Separate amenities with commas.
-            </p>
-
-          </FormSection>
-
-          {/* Submit */}
+          {/* SUBMIT */}
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 w-full rounded-xl bg-[#E07A5F] px-5 py-3.5 font-semibold text-white transition hover:bg-[#d96c50] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-2xl bg-[#E07A5F] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#d96c50] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "Creating property..." : "Publish property"}
+            {loading ? "Creating property..." : "Create property"}
           </button>
 
         </form>
@@ -314,54 +379,6 @@ function CreateProperty() {
       </div>
 
     </main>
-  );
-}
-
-function FormSection({ title, children }) {
-  return (
-    <section className="border-b border-gray-100 py-7 first:pt-0 last:border-0">
-
-      <h2 className="mb-5 text-lg font-semibold text-gray-900">
-        {title}
-      </h2>
-
-      <div className="space-y-5">
-        {children}
-      </div>
-
-    </section>
-  );
-}
-
-function Input({
-  label,
-  name,
-  type = "text",
-  value,
-  onChange,
-  placeholder,
-  required = false,
-  min,
-}) {
-  return (
-    <div>
-
-      <label className="mb-2 block text-sm font-medium text-gray-700">
-        {label}
-      </label>
-
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        min={min}
-        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/20"
-      />
-
-    </div>
   );
 }
 
