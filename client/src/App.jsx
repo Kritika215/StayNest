@@ -10,7 +10,7 @@ import CreateProperty from "./pages/CreateProperty";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Wishlist from "./pages/Wishlist";
-
+import MyBookings from "./pages/MyBookings";
 
 function App() {
   return (
@@ -56,6 +56,11 @@ function App() {
               path="/wishlist"
               element={<Wishlist />}
           />
+
+          <Route
+             path="/my-bookings"
+              element={<MyBookings />}
+            />
 
         </Routes>
 

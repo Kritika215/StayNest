@@ -19,7 +19,19 @@ function PropertyDetails() {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [liked, setLiked] = useState(false);
+
+  // Booking states
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [bookingGuests, setBookingGuests] = useState(1);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState("");
+
+  // ============================
+  // FETCH PROPERTY
+  // ============================
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -45,16 +57,69 @@ function PropertyDetails() {
     fetchProperty();
   }, [id]);
 
+  // ============================
+  // BOOK PROPERTY
+  // ============================
+
+  const handleBooking = async () => {
+    if (!checkIn || !checkOut) {
+      setBookingMessage(
+        "Please select check-in and check-out dates."
+      );
+      return;
+    }
+
+    if (checkOut <= checkIn) {
+      setBookingMessage(
+        "Check-out must be after check-in."
+      );
+      return;
+    }
+
+    try {
+      setBookingLoading(true);
+      setBookingMessage("");
+
+      const response = await api.post("/bookings", {
+        propertyId: property._id,
+        checkIn,
+        checkOut,
+        guests: Number(bookingGuests),
+      });
+
+      setBookingMessage(
+        response.data.message ||
+          "Booking successful!"
+      );
+
+      setCheckIn("");
+      setCheckOut("");
+      setBookingGuests(1);
+    } catch (err) {
+      console.error("Booking error:", err);
+
+      setBookingMessage(
+        err.response?.data?.message ||
+          "Booking failed. Please login and try again."
+      );
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  // ============================
+  // LOADING
+  // ============================
+
   if (loading) {
     return (
       <main className="min-h-screen bg-[#FAFAF8]">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-
           <div className="animate-pulse">
 
             <div className="h-6 w-32 rounded bg-gray-200" />
 
-            <div className="mt-8 h-[300px] rounded-3xl bg-gray-200 sm:h-[450px] lg:h-[560px]" />
+            <div className="mt-8 h-[300px] rounded-3xl bg-gray-200 sm:h-[430px] lg:h-[560px]" />
 
             <div className="mt-8 h-8 w-2/3 rounded bg-gray-200" />
 
@@ -65,6 +130,10 @@ function PropertyDetails() {
       </main>
     );
   }
+
+  // ============================
+  // ERROR
+  // ============================
 
   if (error || !property) {
     return (
@@ -77,7 +146,8 @@ function PropertyDetails() {
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-gray-500">
-            {error || "This property may have been removed."}
+            {error ||
+              "This property may have been removed."}
           </p>
 
           <Link
@@ -93,7 +163,7 @@ function PropertyDetails() {
     );
   }
 
-  const image =
+  const propertyImage =
     property.image ||
     property.images?.[0] ||
     "";
@@ -101,7 +171,9 @@ function PropertyDetails() {
   return (
     <main className="min-h-screen bg-[#FAFAF8]">
 
-      {/* ================= TOP ================= */}
+      {/* ============================
+          TOP BAR
+      ============================ */}
 
       <section className="mx-auto max-w-7xl px-4 pb-8 pt-6 sm:px-6 lg:px-8">
 
@@ -137,7 +209,11 @@ function PropertyDetails() {
             >
               <Heart
                 size={18}
-                fill={liked ? "currentColor" : "none"}
+                fill={
+                  liked
+                    ? "currentColor"
+                    : "none"
+                }
               />
             </button>
 
@@ -145,8 +221,9 @@ function PropertyDetails() {
 
         </div>
 
-
-        {/* ================= TITLE ================= */}
+        {/* ============================
+            TITLE
+        ============================ */}
 
         <div className="mt-7">
 
@@ -168,25 +245,35 @@ function PropertyDetails() {
 
                 <span className="flex items-center gap-1.5">
                   <MapPin size={15} />
+
                   {property.location}
-                  {property.city && `, ${property.city}`}
+
+                  {property.city &&
+                    `, ${property.city}`}
                 </span>
 
-                {property.rating !== undefined && (
-                  <span className="flex items-center gap-1 font-medium text-gray-800">
-                    <Star
-                      size={15}
-                      fill="currentColor"
-                    />
-                    {Number(property.rating).toFixed(1)}
-                  </span>
-                )}
+                {property.rating !== undefined &&
+                  property.rating !== null && (
+                    <span className="flex items-center gap-1 font-medium text-gray-800">
 
-                {property.reviews !== undefined && (
-                  <span>
-                    {property.reviews} reviews
-                  </span>
-                )}
+                      <Star
+                        size={15}
+                        fill="currentColor"
+                      />
+
+                      {Number(
+                        property.rating
+                      ).toFixed(1)}
+
+                    </span>
+                  )}
+
+                {property.reviews !== undefined &&
+                  property.reviews !== null && (
+                    <span>
+                      {property.reviews} reviews
+                    </span>
+                  )}
 
               </div>
 
@@ -196,14 +283,15 @@ function PropertyDetails() {
 
         </div>
 
-
-        {/* ================= IMAGE ================= */}
+        {/* ============================
+            PROPERTY IMAGE
+        ============================ */}
 
         <div className="mt-8 overflow-hidden rounded-3xl bg-gray-100">
 
-          {image ? (
+          {propertyImage ? (
             <img
-              src={image}
+              src={propertyImage}
               alt={property.title}
               className="h-[280px] w-full object-cover sm:h-[430px] lg:h-[560px]"
             />
@@ -217,15 +305,17 @@ function PropertyDetails() {
 
       </section>
 
-
-      {/* ================= CONTENT ================= */}
+      {/* ============================
+          MAIN CONTENT
+      ============================ */}
 
       <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
 
         <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
 
-
-          {/* ================= LEFT ================= */}
+          {/* ============================
+              LEFT CONTENT
+          ============================ */}
 
           <div>
 
@@ -236,22 +326,29 @@ function PropertyDetails() {
               <div>
 
                 <h2 className="text-xl font-bold text-gray-900">
-                  {property.category || "Stay"} hosted on StayNest
+                  {property.category ||
+                    "Stay"}{" "}
+                  hosted on StayNest
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-500">
-                  {property.guests} guests · {property.bedrooms} bedrooms ·{" "}
-                  {property.beds} beds · {property.bathrooms} bathrooms
+                  {property.guests || 0} guests ·{" "}
+                  {property.bedrooms || 0} bedrooms ·{" "}
+                  {property.beds || 0} beds ·{" "}
+                  {property.bathrooms || 0} bathrooms
                 </p>
 
               </div>
 
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#F4EFEA] text-lg font-bold text-[#E07A5F]">
-                {property.host?.name?.charAt(0)?.toUpperCase() || "H"}
+
+                {property.host?.name
+                  ?.charAt(0)
+                  ?.toUpperCase() || "H"}
+
               </div>
 
             </div>
-
 
             {/* DESCRIPTION */}
 
@@ -262,11 +359,11 @@ function PropertyDetails() {
               </h2>
 
               <p className="mt-4 whitespace-pre-line text-sm leading-7 text-gray-600 sm:text-base">
-                {property.description}
+                {property.description ||
+                  "A beautiful place to stay and enjoy your trip."}
               </p>
 
             </div>
-
 
             {/* DETAILS */}
 
@@ -280,28 +377,27 @@ function PropertyDetails() {
 
                 <div className="flex items-center gap-3 text-sm text-gray-700">
                   <Users size={19} />
-                  {property.guests} guests
+                  {property.guests || 0} guests
                 </div>
 
                 <div className="flex items-center gap-3 text-sm text-gray-700">
                   <BedDouble size={19} />
-                  {property.beds} beds
+                  {property.beds || 0} beds
                 </div>
 
                 <div className="flex items-center gap-3 text-sm text-gray-700">
                   <BedDouble size={19} />
-                  {property.bedrooms} bedrooms
+                  {property.bedrooms || 0} bedrooms
                 </div>
 
                 <div className="flex items-center gap-3 text-sm text-gray-700">
                   <Bath size={19} />
-                  {property.bathrooms} bathrooms
+                  {property.bathrooms || 0} bathrooms
                 </div>
 
               </div>
 
             </div>
-
 
             {/* AMENITIES */}
 
@@ -314,15 +410,23 @@ function PropertyDetails() {
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
 
-                  {property.amenities.map((amenity, index) => (
-                    <div
-                      key={`${amenity}-${index}`}
-                      className="flex items-center gap-3 rounded-xl bg-white p-4 text-sm text-gray-700"
-                    >
-                      <Wifi size={17} className="text-gray-500" />
-                      {amenity}
-                    </div>
-                  ))}
+                  {property.amenities.map(
+                    (amenity, index) => (
+                      <div
+                        key={`${amenity}-${index}`}
+                        className="flex items-center gap-3 rounded-xl bg-white p-4 text-sm text-gray-700"
+                      >
+
+                        <Wifi
+                          size={17}
+                          className="text-gray-500"
+                        />
+
+                        {amenity}
+
+                      </div>
+                    )
+                  )}
 
                 </div>
 
@@ -331,19 +435,25 @@ function PropertyDetails() {
 
           </div>
 
-
-          {/* ================= BOOKING CARD ================= */}
+          {/* ============================
+              BOOKING CARD
+          ============================ */}
 
           <aside>
 
             <div className="sticky top-24 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg shadow-gray-200/40">
+
+              {/* PRICE */}
 
               <div className="flex items-baseline justify-between">
 
                 <div>
 
                   <span className="text-2xl font-bold text-gray-900">
-                    ₹{Number(property.price).toLocaleString("en-IN")}
+                    ₹
+                    {Number(
+                      property.price || 0
+                    ).toLocaleString("en-IN")}
                   </span>
 
                   <span className="ml-1 text-sm text-gray-500">
@@ -352,18 +462,25 @@ function PropertyDetails() {
 
                 </div>
 
-                {property.rating !== undefined && (
-                  <div className="flex items-center gap-1 text-sm font-medium">
-                    <Star
-                      size={14}
-                      fill="currentColor"
-                    />
-                    {Number(property.rating).toFixed(1)}
-                  </div>
-                )}
+                {property.rating !== undefined &&
+                  property.rating !== null && (
+                    <div className="flex items-center gap-1 text-sm font-medium">
+
+                      <Star
+                        size={14}
+                        fill="currentColor"
+                      />
+
+                      {Number(
+                        property.rating
+                      ).toFixed(1)}
+
+                    </div>
+                  )}
 
               </div>
 
+              {/* LOCATION / GUESTS */}
 
               <div className="mt-6 grid grid-cols-2 overflow-hidden rounded-2xl border border-gray-200">
 
@@ -374,7 +491,9 @@ function PropertyDetails() {
                   </p>
 
                   <p className="mt-1 truncate text-sm font-medium text-gray-800">
-                    {property.city}
+                    {property.city ||
+                      property.location ||
+                      "Not specified"}
                   </p>
 
                 </div>
@@ -382,27 +501,146 @@ function PropertyDetails() {
                 <div className="p-4">
 
                   <p className="text-[11px] font-semibold uppercase text-gray-400">
-                    Guests
+                    Max guests
                   </p>
 
                   <p className="mt-1 text-sm font-medium text-gray-800">
-                    {property.guests}
+                    {property.guests || 1}
                   </p>
 
                 </div>
 
               </div>
 
+              {/* DATES */}
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+
+                <div>
+
+                  <label className="text-xs font-semibold text-gray-600">
+                    Check-in
+                  </label>
+
+                  <input
+                    type="date"
+                    value={checkIn}
+                    min={
+                      new Date()
+                        .toISOString()
+                        .split("T")[0]
+                    }
+                    onChange={(e) =>
+                      setCheckIn(e.target.value)
+                    }
+                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#E07A5F]"
+                  />
+
+                </div>
+
+                <div>
+
+                  <label className="text-xs font-semibold text-gray-600">
+                    Check-out
+                  </label>
+
+                  <input
+                    type="date"
+                    value={checkOut}
+                    min={
+                      checkIn ||
+                      new Date()
+                        .toISOString()
+                        .split("T")[0]
+                    }
+                    onChange={(e) =>
+                      setCheckOut(e.target.value)
+                    }
+                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#E07A5F]"
+                  />
+
+                </div>
+
+              </div>
+
+              {/* GUESTS */}
+
+              <div className="mt-3">
+
+                <label className="text-xs font-semibold text-gray-600">
+                  Guests
+                </label>
+
+                <select
+                  value={bookingGuests}
+                  onChange={(e) =>
+                    setBookingGuests(
+                      Number(e.target.value)
+                    )
+                  }
+                  className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#E07A5F]"
+                >
+
+                  {Array.from(
+                    {
+                      length:
+                        property.guests || 1,
+                    },
+                    (_, index) =>
+                      index + 1
+                  ).map((number) => (
+                    <option
+                      key={number}
+                      value={number}
+                    >
+                      {number}{" "}
+                      {number === 1
+                        ? "guest"
+                        : "guests"}
+                    </option>
+                  ))}
+
+                </select>
+
+              </div>
+
+              {/* RESERVE BUTTON */}
 
               <button
                 type="button"
-                className="mt-5 w-full rounded-2xl bg-[#E07A5F] py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#D96D52] hover:shadow-md"
+                disabled={
+                  bookingLoading ||
+                  !checkIn ||
+                  !checkOut
+                }
+                onClick={handleBooking}
+                className="mt-5 w-full rounded-2xl bg-[#E07A5F] py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#D96D52] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
               >
-                Reserve
+
+                {bookingLoading
+                  ? "Booking..."
+                  : "Reserve"}
+
               </button>
 
+              {/* BOOKING MESSAGE */}
+
+              {bookingMessage && (
+                <div
+                  className={`mt-3 rounded-xl p-3 text-center text-sm font-medium ${
+                    bookingMessage
+                      .toLowerCase()
+                      .includes("success")
+                      ? "bg-green-50 text-green-700"
+                      : "bg-red-50 text-red-600"
+                  }`}
+                >
+                  {bookingMessage}
+                </div>
+              )}
+
               <p className="mt-3 text-center text-xs text-gray-400">
-                Booking functionality coming next.
+                You won't be charged until your booking is confirmed.
               </p>
 
             </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, Menu, X, UserCircle } from "lucide-react";
+import { Menu, X, UserCircle, CalendarDays } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 
 function Navbar() {
@@ -14,9 +14,11 @@ function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur">
+
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* LOGO */}
+
         <Link
           to="/"
           onClick={() => setOpen(false)}
@@ -27,14 +29,28 @@ function Navbar() {
 
 
         {/* DESKTOP NAV */}
+
         <div className="hidden items-center gap-8 md:flex">
 
-          <NavLink to="/" className={navClass}>
+          <NavLink
+            to="/"
+            className={navClass}
+          >
             Home
           </NavLink>
 
-          <NavLink to="/explore" className={navClass}>
+          <NavLink
+            to="/explore"
+            className={navClass}
+          >
             Explore
+          </NavLink>
+
+          <NavLink
+            to="/my-bookings"
+            className={navClass}
+          >
+            My Bookings
           </NavLink>
 
           <Link
@@ -48,6 +64,7 @@ function Navbar() {
 
 
         {/* DESKTOP ACTIONS */}
+
         <div className="hidden items-center gap-3 md:flex">
 
           <Link
@@ -69,23 +86,31 @@ function Navbar() {
 
 
         {/* MOBILE MENU BUTTON */}
+
         <button
           type="button"
           onClick={() => setOpen(!open)}
           className="flex h-10 w-10 items-center justify-center rounded-full text-gray-700 transition hover:bg-gray-100 md:hidden"
           aria-label="Toggle menu"
         >
-          {open ? <X size={22} /> : <Menu size={22} />}
+          {open ? (
+            <X size={22} />
+          ) : (
+            <Menu size={22} />
+          )}
         </button>
 
       </nav>
 
 
       {/* MOBILE MENU */}
+
       {open && (
         <div className="border-t border-gray-100 bg-white px-4 pb-5 pt-3 md:hidden">
 
           <div className="flex flex-col">
+
+            {/* HOME */}
 
             <NavLink
               to="/"
@@ -101,6 +126,9 @@ function Navbar() {
               Home
             </NavLink>
 
+
+            {/* EXPLORE */}
+
             <NavLink
               to="/explore"
               onClick={() => setOpen(false)}
@@ -115,6 +143,27 @@ function Navbar() {
               Explore
             </NavLink>
 
+
+            {/* MY BOOKINGS */}
+
+            <NavLink
+              to="/my-bookings"
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium ${
+                  isActive
+                    ? "bg-[#F4EFEA] text-[#E07A5F]"
+                    : "text-gray-700"
+                }`
+              }
+            >
+              <CalendarDays size={17} />
+              My Bookings
+            </NavLink>
+
+
+            {/* HOST */}
+
             <Link
               to="/create-property"
               onClick={() => setOpen(false)}
@@ -123,7 +172,11 @@ function Navbar() {
               Become a host
             </Link>
 
+
             <div className="my-2 border-t border-gray-100" />
+
+
+            {/* LOGIN */}
 
             <Link
               to="/login"
@@ -132,6 +185,9 @@ function Navbar() {
             >
               Login
             </Link>
+
+
+            {/* SIGN UP */}
 
             <Link
               to="/register"
@@ -145,6 +201,7 @@ function Navbar() {
 
         </div>
       )}
+
     </header>
   );
 }
