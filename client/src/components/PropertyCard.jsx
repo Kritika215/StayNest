@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Heart, MapPin, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -12,8 +13,17 @@ function PropertyCard({
   category,
   guests,
 }) {
+  const [liked, setLiked] = useState(false);
+
   const propertyImage =
     image || (images?.length > 0 ? images[0] : "");
+
+  const toggleWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setLiked((prev) => !prev);
+  };
 
   return (
     <article className="group min-w-0">
@@ -53,14 +63,19 @@ function PropertyCard({
         {/* WISHLIST */}
         <button
           type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-sm backdrop-blur transition hover:scale-105 hover:bg-white"
-          aria-label="Add to wishlist"
+          onClick={toggleWishlist}
+          className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition hover:scale-105 hover:bg-white ${
+            liked ? "text-[#E07A5F]" : "text-gray-700"
+          }`}
+          aria-label={
+            liked ? "Remove from wishlist" : "Add to wishlist"
+          }
         >
-          <Heart size={17} strokeWidth={2} />
+          <Heart
+            size={17}
+            strokeWidth={2}
+            fill={liked ? "currentColor" : "none"}
+          />
         </button>
 
       </div>
@@ -83,6 +98,7 @@ function PropertyCard({
 
           {rating !== undefined && rating !== null && (
             <div className="flex shrink-0 items-center gap-1 text-xs font-medium text-gray-800">
+
               <Star
                 size={13}
                 fill="currentColor"
@@ -92,6 +108,7 @@ function PropertyCard({
               <span>
                 {Number(rating).toFixed(1)}
               </span>
+
             </div>
           )}
 

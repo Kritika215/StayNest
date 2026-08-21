@@ -1,47 +1,61 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
 import PropertyDetails from "./pages/PropertyDetails";
+import CreateProperty from "./pages/CreateProperty";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import CreateProperty from "./pages/CreateProperty";
-import Footer from "./components/Footer";
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
 
-      <Routes>
-        <Route path="/" element={<Home />} />
+      <div className="min-h-screen bg-[#FAFAF8]">
 
-        <Route path="/explore" element={<Explore />} />
+        <Navbar />
 
-        <Route
-          path="/property/:id"
-          element={<PropertyDetails />}
-        />
+        <Routes>
 
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+          <Route
+            path="/"
+            element={<Home />}
+          />
 
-        <Route
-          path="/register"
-          element={<Register />}
-        />
+          <Route
+            path="/explore"
+            element={<Explore />}
+          />
 
-        <Route
-          path="/create-property"
-          element={<CreateProperty />}
-        />
-        
-      </Routes>
-      <Footer />
+          <Route
+            path="/property/:id"
+            element={<PropertyDetails />}
+          />
+
+          <Route
+            path="/create-property"
+            element={<CreateProperty />}
+          />
+
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+
+          <Route
+            path="/register"
+            element={<Register />}
+          />
+
+        </Routes>
+
+        <Footer />
+
+      </div>
+
     </BrowserRouter>
   );
 }

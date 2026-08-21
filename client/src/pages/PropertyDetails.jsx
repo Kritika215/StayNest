@@ -3,32 +3,40 @@ import {
   ArrowLeft,
   Bath,
   BedDouble,
-  CalendarDays,
-  Check,
   Heart,
   MapPin,
+  Share2,
   Star,
   Users,
+  Wifi,
 } from "lucide-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import api from "../api/axios";
 
 function PropertyDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [liked, setLiked] = useState(false);
 
   useEffect(() => {
     const fetchProperty = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const response = await api.get(`/properties/${id}`);
+
         setProperty(response.data.property);
-      } catch (error) {
-        console.error("Failed to fetch property:", error);
-        setError("Property not found.");
+      } catch (err) {
+        console.error("Failed to fetch property:", err);
+
+        setError(
+          err.response?.data?.message ||
+            "Unable to load this property."
+        );
       } finally {
         setLoading(false);
       }
@@ -40,16 +48,19 @@ function PropertyDetails() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[#FAFAF8]">
-        <div className="mx-auto max-w-7xl animate-pulse px-4 py-8 sm:px-6 lg:px-8">
-          <div className="h-5 w-24 rounded bg-gray-200" />
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-          <div className="mt-6 h-[280px] rounded-3xl bg-gray-200 sm:h-[420px] lg:h-[520px]" />
+          <div className="animate-pulse">
 
-          <div className="mt-8 h-8 w-2/3 rounded bg-gray-200" />
+            <div className="h-6 w-32 rounded bg-gray-200" />
 
-          <div className="mt-4 h-5 w-1/3 rounded bg-gray-200" />
+            <div className="mt-8 h-[300px] rounded-3xl bg-gray-200 sm:h-[450px] lg:h-[560px]" />
 
-          <div className="mt-10 h-40 rounded-2xl bg-gray-200" />
+            <div className="mt-8 h-8 w-2/3 rounded bg-gray-200" />
+
+            <div className="mt-4 h-5 w-1/3 rounded bg-gray-200" />
+
+          </div>
         </div>
       </main>
     );
@@ -57,227 +68,235 @@ function PropertyDetails() {
 
   if (error || !property) {
     return (
-      <main className="flex min-h-[70vh] items-center justify-center bg-[#FAFAF8] px-4">
-        <div className="text-center">
+      <main className="flex min-h-screen items-center justify-center bg-[#FAFAF8] px-4">
+
+        <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-8 text-center shadow-sm">
+
           <h1 className="text-2xl font-bold text-gray-900">
             Property not found
           </h1>
 
-          <p className="mt-2 text-sm text-gray-500">
-            This property may have been removed or the link is incorrect.
+          <p className="mt-3 text-sm leading-6 text-gray-500">
+            {error || "This property may have been removed."}
           </p>
 
-          <button
-            onClick={() => navigate("/explore")}
-            className="mt-6 rounded-full bg-[#E07A5F] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#d96c50]"
+          <Link
+            to="/explore"
+            className="mt-6 inline-flex rounded-full bg-[#E07A5F] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#D96D52]"
           >
-            Back to Explore
-          </button>
+            Explore stays
+          </Link>
+
         </div>
+
       </main>
     );
   }
 
-  const propertyImages =
-    property.images?.length > 0
-      ? property.images
-      : property.image
-        ? [property.image]
-        : [];
-
-  const amenities = Array.isArray(property.amenities)
-    ? property.amenities
-    : [];
+  const image =
+    property.image ||
+    property.images?.[0] ||
+    "";
 
   return (
     <main className="min-h-screen bg-[#FAFAF8]">
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      {/* ================= TOP ================= */}
 
-        {/* BACK */}
-        <Link
-          to="/explore"
-          className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-900"
-        >
-          <ArrowLeft size={17} />
-          Back to Explore
-        </Link>
+      <section className="mx-auto max-w-7xl px-4 pb-8 pt-6 sm:px-6 lg:px-8">
 
+        <div className="flex items-center justify-between">
 
-        {/* IMAGE GALLERY */}
-        <section className="overflow-hidden rounded-3xl bg-gray-100">
+          <Link
+            to="/explore"
+            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-900"
+          >
+            <ArrowLeft size={17} />
+            Back to explore
+          </Link>
 
-          {propertyImages.length === 0 ? (
-            <div className="flex h-[280px] items-center justify-center text-gray-400 sm:h-[420px]">
-              No images available
-            </div>
-          ) : propertyImages.length === 1 ? (
-            <img
-              src={propertyImages[0]}
-              alt={property.title}
-              className="h-[280px] w-full object-cover sm:h-[420px] lg:h-[520px]"
-            />
-          ) : (
-            <div className="grid h-[420px] grid-cols-1 gap-2 sm:grid-cols-2 lg:h-[520px]">
+          <div className="flex gap-2">
 
-              <img
-                src={propertyImages[0]}
-                alt={property.title}
-                className="h-full w-full object-cover"
+            <button
+              type="button"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50"
+              aria-label="Share property"
+            >
+              <Share2 size={17} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setLiked(!liked)}
+              className={`flex h-10 w-10 items-center justify-center rounded-full border bg-white transition ${
+                liked
+                  ? "border-red-200 text-red-500"
+                  : "border-gray-200 text-gray-700 hover:bg-gray-50"
+              }`}
+              aria-label="Wishlist"
+            >
+              <Heart
+                size={18}
+                fill={liked ? "currentColor" : "none"}
               />
+            </button>
 
-              <div className="hidden grid-cols-2 gap-2 sm:grid">
+          </div>
 
-                {propertyImages.slice(1, 5).map((img, index) => (
-                  <img
-                    key={index}
-                    src={img}
-                    alt={`${property.title} ${index + 2}`}
-                    className="h-full w-full object-cover"
-                  />
-                ))}
+        </div>
+
+
+        {/* ================= TITLE ================= */}
+
+        <div className="mt-7">
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+
+            <div>
+
+              {property.category && (
+                <span className="text-sm font-semibold uppercase tracking-widest text-[#E07A5F]">
+                  {property.category}
+                </span>
+              )}
+
+              <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
+                {property.title}
+              </h1>
+
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
+
+                <span className="flex items-center gap-1.5">
+                  <MapPin size={15} />
+                  {property.location}
+                  {property.city && `, ${property.city}`}
+                </span>
+
+                {property.rating !== undefined && (
+                  <span className="flex items-center gap-1 font-medium text-gray-800">
+                    <Star
+                      size={15}
+                      fill="currentColor"
+                    />
+                    {Number(property.rating).toFixed(1)}
+                  </span>
+                )}
+
+                {property.reviews !== undefined && (
+                  <span>
+                    {property.reviews} reviews
+                  </span>
+                )}
 
               </div>
 
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* ================= IMAGE ================= */}
+
+        <div className="mt-8 overflow-hidden rounded-3xl bg-gray-100">
+
+          {image ? (
+            <img
+              src={image}
+              alt={property.title}
+              className="h-[280px] w-full object-cover sm:h-[430px] lg:h-[560px]"
+            />
+          ) : (
+            <div className="flex h-[280px] items-center justify-center text-gray-400 sm:h-[430px] lg:h-[560px]">
+              No image available
             </div>
           )}
 
-        </section>
+        </div>
+
+      </section>
 
 
-        {/* MAIN CONTENT */}
-        <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_360px] lg:gap-14">
+      {/* ================= CONTENT ================= */}
 
-          {/* LEFT */}
+      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+
+        <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
+
+
+          {/* ================= LEFT ================= */}
+
           <div>
 
-            {/* TITLE */}
-            <div className="border-b border-gray-200 pb-7">
-
-              <div className="flex flex-wrap items-start justify-between gap-4">
-
-                <div className="min-w-0">
-
-                  {property.category && (
-                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#E07A5F]">
-                      {property.category}
-                    </span>
-                  )}
-
-                  <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl lg:text-4xl">
-                    {property.title}
-                  </h1>
-
-                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
-
-                    <span className="flex items-center gap-1.5">
-                      <MapPin size={15} />
-                      {property.location}
-                    </span>
-
-                    {property.rating && (
-                      <span className="flex items-center gap-1 font-medium text-gray-800">
-                        <Star
-                          size={15}
-                          fill="currentColor"
-                        />
-                        {Number(property.rating).toFixed(1)}
-
-                        {property.reviews !== undefined && (
-                          <span className="font-normal text-gray-500">
-                            ({property.reviews} reviews)
-                          </span>
-                        )}
-                      </span>
-                    )}
-
-                  </div>
-
-                </div>
-
-                <button
-                  type="button"
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:bg-gray-50"
-                >
-                  <Heart size={19} />
-                </button>
-
-              </div>
-
-            </div>
-
-
             {/* HOST */}
-            <div className="border-b border-gray-200 py-7">
 
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between border-b border-gray-200 pb-7">
 
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F4EFEA] text-lg font-bold text-[#E07A5F]">
-                  {property.host?.name?.charAt(0)?.toUpperCase() || "H"}
-                </div>
+              <div>
 
-                <div>
-                  <p className="text-sm text-gray-500">
-                    Hosted by
-                  </p>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {property.category || "Stay"} hosted on StayNest
+                </h2>
 
-                  <p className="font-semibold text-gray-900">
-                    {property.host?.name || "StayNest Host"}
-                  </p>
-                </div>
+                <p className="mt-1 text-sm text-gray-500">
+                  {property.guests} guests · {property.bedrooms} bedrooms ·{" "}
+                  {property.beds} beds · {property.bathrooms} bathrooms
+                </p>
 
+              </div>
+
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#F4EFEA] text-lg font-bold text-[#E07A5F]">
+                {property.host?.name?.charAt(0)?.toUpperCase() || "H"}
               </div>
 
             </div>
 
 
-            {/* PROPERTY INFO */}
-            <div className="border-b border-gray-200 py-7">
+            {/* DESCRIPTION */}
+
+            <div className="border-b border-gray-200 py-8">
 
               <h2 className="text-xl font-bold text-gray-900">
                 About this place
               </h2>
 
-              <p className="mt-4 text-sm leading-7 text-gray-600 sm:text-base">
-                {property.description ||
-                  "Enjoy a comfortable and memorable stay at this beautiful property."}
+              <p className="mt-4 whitespace-pre-line text-sm leading-7 text-gray-600 sm:text-base">
+                {property.description}
               </p>
 
             </div>
 
 
             {/* DETAILS */}
-            <div className="border-b border-gray-200 py-7">
+
+            <div className="border-b border-gray-200 py-8">
 
               <h2 className="text-xl font-bold text-gray-900">
-                Property details
+                What this place offers
               </h2>
 
-              <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
 
-                <Detail
-                  icon={<Users size={19} />}
-                  label="Guests"
-                  value={property.guests}
-                />
+                <div className="flex items-center gap-3 text-sm text-gray-700">
+                  <Users size={19} />
+                  {property.guests} guests
+                </div>
 
-                <Detail
-                  icon={<BedDouble size={19} />}
-                  label="Bedrooms"
-                  value={property.bedrooms}
-                />
+                <div className="flex items-center gap-3 text-sm text-gray-700">
+                  <BedDouble size={19} />
+                  {property.beds} beds
+                </div>
 
-                <Detail
-                  icon={<BedDouble size={19} />}
-                  label="Beds"
-                  value={property.beds}
-                />
+                <div className="flex items-center gap-3 text-sm text-gray-700">
+                  <BedDouble size={19} />
+                  {property.bedrooms} bedrooms
+                </div>
 
-                <Detail
-                  icon={<Bath size={19} />}
-                  label="Bathrooms"
-                  value={property.bathrooms}
-                />
+                <div className="flex items-center gap-3 text-sm text-gray-700">
+                  <Bath size={19} />
+                  {property.bathrooms} bathrooms
+                </div>
 
               </div>
 
@@ -285,24 +304,22 @@ function PropertyDetails() {
 
 
             {/* AMENITIES */}
-            {amenities.length > 0 && (
-              <div className="py-7">
+
+            {property.amenities?.length > 0 && (
+              <div className="py-8">
 
                 <h2 className="text-xl font-bold text-gray-900">
-                  What this place offers
+                  Amenities
                 </h2>
 
-                <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
 
-                  {amenities.map((amenity, index) => (
+                  {property.amenities.map((amenity, index) => (
                     <div
-                      key={index}
-                      className="flex items-center gap-3 text-sm text-gray-600"
+                      key={`${amenity}-${index}`}
+                      className="flex items-center gap-3 rounded-xl bg-white p-4 text-sm text-gray-700"
                     >
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F4EFEA] text-[#E07A5F]">
-                        <Check size={15} />
-                      </span>
-
+                      <Wifi size={17} className="text-gray-500" />
                       {amenity}
                     </div>
                   ))}
@@ -315,81 +332,77 @@ function PropertyDetails() {
           </div>
 
 
-          {/* BOOKING CARD */}
-          <aside className="lg:sticky lg:top-28 lg:self-start">
+          {/* ================= BOOKING CARD ================= */}
 
-            <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+          <aside>
 
-              <div className="flex items-baseline gap-1">
+            <div className="sticky top-24 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg shadow-gray-200/40">
 
-                <span className="text-2xl font-bold text-gray-900">
-                  ₹{Number(property.price || 0).toLocaleString("en-IN")}
-                </span>
+              <div className="flex items-baseline justify-between">
 
-                <span className="text-sm text-gray-500">
-                  / night
-                </span>
+                <div>
 
-              </div>
+                  <span className="text-2xl font-bold text-gray-900">
+                    ₹{Number(property.price).toLocaleString("en-IN")}
+                  </span>
 
-              {property.rating && (
-                <div className="mt-2 flex items-center gap-1 text-sm">
+                  <span className="ml-1 text-sm text-gray-500">
+                    / night
+                  </span>
 
-                  <Star
-                    size={14}
-                    fill="currentColor"
-                  />
+                </div>
 
-                  <span className="font-medium">
+                {property.rating !== undefined && (
+                  <div className="flex items-center gap-1 text-sm font-medium">
+                    <Star
+                      size={14}
+                      fill="currentColor"
+                    />
                     {Number(property.rating).toFixed(1)}
-                  </span>
-
-                  <span className="text-gray-500">
-                    · {property.reviews || 0} reviews
-                  </span>
-
-                </div>
-              )}
-
-              <div className="mt-6 grid grid-cols-2 overflow-hidden rounded-xl border border-gray-200">
-
-                <div className="border-r border-gray-200 p-3">
-
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
-                    <CalendarDays size={14} />
-                    Check in
                   </div>
+                )}
 
-                  <p className="mt-1 text-sm text-gray-400">
-                    Add date
+              </div>
+
+
+              <div className="mt-6 grid grid-cols-2 overflow-hidden rounded-2xl border border-gray-200">
+
+                <div className="border-r border-gray-200 p-4">
+
+                  <p className="text-[11px] font-semibold uppercase text-gray-400">
+                    Location
+                  </p>
+
+                  <p className="mt-1 truncate text-sm font-medium text-gray-800">
+                    {property.city}
                   </p>
 
                 </div>
 
-                <div className="p-3">
+                <div className="p-4">
 
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
-                    <CalendarDays size={14} />
-                    Check out
-                  </div>
+                  <p className="text-[11px] font-semibold uppercase text-gray-400">
+                    Guests
+                  </p>
 
-                  <p className="mt-1 text-sm text-gray-400">
-                    Add date
+                  <p className="mt-1 text-sm font-medium text-gray-800">
+                    {property.guests}
                   </p>
 
                 </div>
 
               </div>
+
 
               <button
                 type="button"
-                className="mt-4 w-full rounded-xl bg-[#E07A5F] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#d96c50]"
+                className="mt-5 w-full rounded-2xl bg-[#E07A5F] py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#D96D52] hover:shadow-md"
               >
                 Reserve
               </button>
 
               <p className="mt-3 text-center text-xs text-gray-400">
-                You won't be charged yet
+                Booking functionality coming next.
               </p>
 
             </div>
@@ -398,29 +411,9 @@ function PropertyDetails() {
 
         </div>
 
-      </div>
+      </section>
 
     </main>
-  );
-}
-
-function Detail({ icon, label, value }) {
-  return (
-    <div className="rounded-2xl bg-white p-4 ring-1 ring-gray-100">
-
-      <div className="text-[#E07A5F]">
-        {icon}
-      </div>
-
-      <p className="mt-3 text-xs text-gray-500">
-        {label}
-      </p>
-
-      <p className="mt-1 text-sm font-semibold text-gray-900">
-        {value || "—"}
-      </p>
-
-    </div>
   );
 }
 

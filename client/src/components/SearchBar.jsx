@@ -1,11 +1,12 @@
-import { Search, MapPin, Users } from "lucide-react";
 import { useState } from "react";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function SearchBar() {
   const navigate = useNavigate();
 
-  const [location, setLocation] = useState("");
+  const [search, setSearch] = useState("");
+  const [city, setCity] = useState("");
   const [guests, setGuests] = useState("");
 
   const handleSearch = (e) => {
@@ -13,8 +14,12 @@ function SearchBar() {
 
     const params = new URLSearchParams();
 
-    if (location.trim()) {
-      params.set("search", location.trim());
+    if (search.trim()) {
+      params.set("search", search.trim());
+    }
+
+    if (city) {
+      params.set("city", city);
     }
 
     if (guests) {
@@ -27,75 +32,105 @@ function SearchBar() {
   return (
     <form
       onSubmit={handleSearch}
-      className="mx-auto flex max-w-4xl flex-col gap-2 rounded-3xl border border-gray-200 bg-white p-2 shadow-xl shadow-gray-900/5 sm:flex-row sm:items-center sm:rounded-full"
+      className="mx-auto mt-10 w-full max-w-4xl"
     >
+      <div className="rounded-3xl border border-gray-200 bg-white p-2 shadow-xl shadow-gray-200/40">
 
-      {/* LOCATION */}
-      <div className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl px-4 py-3 sm:rounded-full">
+        <div className="grid gap-2 md:grid-cols-[1.5fr_1fr_1fr_auto]">
 
-        <MapPin
-          size={19}
-          className="shrink-0 text-[#E07A5F]"
-        />
+          {/* SEARCH */}
+          <div className="flex items-center gap-3 rounded-2xl px-4 py-3 transition focus-within:bg-gray-50">
 
-        <div className="min-w-0 flex-1">
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400">
-            Where
-          </label>
+            <Search
+              size={19}
+              className="shrink-0 text-gray-400"
+            />
 
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Search destinations"
-            className="mt-0.5 w-full border-0 bg-transparent p-0 text-sm text-gray-900 outline-none placeholder:text-gray-400"
-          />
-        </div>
+            <div className="min-w-0 flex-1">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                Search
+              </label>
 
-      </div>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Where do you want to stay?"
+                className="mt-1 w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+              />
+            </div>
+
+          </div>
 
 
-      <div className="hidden h-9 w-px bg-gray-200 sm:block" />
+          {/* CITY */}
+          <div className="rounded-2xl px-4 py-3 transition focus-within:bg-gray-50">
+
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400">
+              Location
+            </label>
+
+            <select
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="mt-1 w-full bg-transparent text-sm text-gray-700 outline-none"
+            >
+              <option value="">Anywhere</option>
+              <option value="Goa">Goa</option>
+              <option value="Rishikesh">Rishikesh</option>
+              <option value="Manali">Manali</option>
+              <option value="Shimla">Shimla</option>
+              <option value="Jaipur">Jaipur</option>
+              <option value="Delhi">Delhi</option>
+            </select>
+
+          </div>
 
 
-      {/* GUESTS */}
-      <div className="flex items-center gap-3 rounded-2xl px-4 py-3 sm:w-44 sm:rounded-full">
+          {/* GUESTS */}
+          <div className="rounded-2xl px-4 py-3 transition focus-within:bg-gray-50">
 
-        <Users
-          size={19}
-          className="shrink-0 text-[#E07A5F]"
-        />
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400">
+              Guests
+            </label>
 
-        <div className="min-w-0 flex-1">
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400">
-            Guests
-          </label>
+            <select
+              value={guests}
+              onChange={(e) => setGuests(e.target.value)}
+              className="mt-1 w-full bg-transparent text-sm text-gray-700 outline-none"
+            >
+              <option value="">Any guests</option>
+              <option value="1">1+ guest</option>
+              <option value="2">2+ guests</option>
+              <option value="3">3+ guests</option>
+              <option value="4">4+ guests</option>
+              <option value="5">5+ guests</option>
+              <option value="6">6+ guests</option>
+            </select>
 
-          <select
-            value={guests}
-            onChange={(e) => setGuests(e.target.value)}
-            className="mt-0.5 w-full border-0 bg-transparent p-0 text-sm text-gray-900 outline-none"
+          </div>
+
+
+          {/* BUTTON */}
+          <button
+            type="submit"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-[#E07A5F] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#D96D52] hover:shadow-md"
           >
-            <option value="">Any guests</option>
-            <option value="1">1+ guest</option>
-            <option value="2">2+ guests</option>
-            <option value="4">4+ guests</option>
-            <option value="6">6+ guests</option>
-            <option value="8">8+ guests</option>
-          </select>
+            <Search size={17} />
+            <span className="md:hidden lg:inline">
+              Search
+            </span>
+          </button>
+
         </div>
 
       </div>
 
-
-      {/* SEARCH BUTTON */}
-      <button
-        type="submit"
-        className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#E07A5F] px-6 text-sm font-semibold text-white transition hover:bg-[#d96c50] sm:w-auto sm:rounded-full"
-      >
-        <Search size={17} />
-        <span>Search</span>
-      </button>
+      {/* MOBILE FILTER HINT */}
+      <div className="mt-3 flex items-center justify-center gap-2 text-xs text-gray-400 md:hidden">
+        <SlidersHorizontal size={13} />
+        Search and discover your perfect stay
+      </div>
 
     </form>
   );
