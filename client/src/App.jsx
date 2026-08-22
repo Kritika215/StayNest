@@ -12,6 +12,8 @@ import Register from "./pages/Register";
 import Wishlist from "./pages/Wishlist";
 import MyBookings from "./pages/MyBookings";
 import HostDashboard from "./pages/HostDashboard";
+import EditProperty from "./pages/EditProperty";
+
 
 function App() {
   return (
@@ -67,6 +69,11 @@ function App() {
              path="/host-dashboard"
              element={<HostDashboard />}
             />
+
+            <Route
+  path="/edit-property/:id"
+  element={<EditProperty />}
+/>
 
         </Routes>
 

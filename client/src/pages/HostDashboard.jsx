@@ -353,12 +353,23 @@ function HostDashboard() {
 
                       <div className="mt-5 flex gap-2">
 
-                        <Link
-                          to={`/property/${property._id}`}
-                          className="flex-1 rounded-xl border border-gray-200 py-2.5 text-center text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-                        >
-                          View
-                        </Link>
+                       <div className="flex flex-1 gap-2">
+
+  <Link
+    to={`/property/${property._id}`}
+    className="flex-1 rounded-xl border border-gray-200 py-2.5 text-center text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+  >
+    View
+  </Link>
+
+  <Link
+    to={`/edit-property/${property._id}`}
+    className="flex-1 rounded-xl bg-[#F4EFEA] py-2.5 text-center text-sm font-semibold text-[#E07A5F] transition hover:bg-[#EDE3DC]"
+  >
+    Edit
+  </Link>
+
+</div>
 
                         <button
                           type="button"
