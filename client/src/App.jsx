@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Wishlist from "./pages/Wishlist";
 import MyBookings from "./pages/MyBookings";
+import HostDashboard from "./pages/HostDashboard";
 
 function App() {
   return (
@@ -60,6 +61,11 @@ function App() {
           <Route
              path="/my-bookings"
               element={<MyBookings />}
+            />
+
+            <Route
+             path="/host-dashboard"
+             element={<HostDashboard />}
             />
 
         </Routes>

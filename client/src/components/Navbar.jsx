@@ -6,10 +6,9 @@ function Navbar() {
   const [open, setOpen] = useState(false);
 
   const navClass = ({ isActive }) =>
-    `text-sm font-medium transition ${
-      isActive
-        ? "text-[#E07A5F]"
-        : "text-gray-600 hover:text-gray-900"
+    `text-sm font-medium transition ${isActive
+      ? "text-[#E07A5F]"
+      : "text-gray-600 hover:text-gray-900"
     }`;
 
   return (
@@ -54,7 +53,7 @@ function Navbar() {
           </NavLink>
 
           <Link
-            to="/create-property"
+            to="/host-dashboard"
             className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
           >
             Become a host
@@ -116,10 +115,9 @@ function Navbar() {
               to="/"
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `rounded-xl px-4 py-3 text-sm font-medium ${
-                  isActive
-                    ? "bg-[#F4EFEA] text-[#E07A5F]"
-                    : "text-gray-700"
+                `rounded-xl px-4 py-3 text-sm font-medium ${isActive
+                  ? "bg-[#F4EFEA] text-[#E07A5F]"
+                  : "text-gray-700"
                 }`
               }
             >
@@ -133,10 +131,9 @@ function Navbar() {
               to="/explore"
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `rounded-xl px-4 py-3 text-sm font-medium ${
-                  isActive
-                    ? "bg-[#F4EFEA] text-[#E07A5F]"
-                    : "text-gray-700"
+                `rounded-xl px-4 py-3 text-sm font-medium ${isActive
+                  ? "bg-[#F4EFEA] text-[#E07A5F]"
+                  : "text-gray-700"
                 }`
               }
             >
@@ -150,10 +147,9 @@ function Navbar() {
               to="/my-bookings"
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium ${
-                  isActive
-                    ? "bg-[#F4EFEA] text-[#E07A5F]"
-                    : "text-gray-700"
+                `flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium ${isActive
+                  ? "bg-[#F4EFEA] text-[#E07A5F]"
+                  : "text-gray-700"
                 }`
               }
             >
@@ -165,9 +161,8 @@ function Navbar() {
             {/* HOST */}
 
             <Link
-              to="/create-property"
-              onClick={() => setOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700"
+              to="/host-dashboard"
+              className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
             >
               Become a host
             </Link>
