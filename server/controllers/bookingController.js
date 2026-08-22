@@ -1,10 +1,6 @@
 import Booking from "../models/Booking.js";
 import Property from "../models/Property.js";
 
-// ============================
-// CREATE BOOKING
-// ============================
-
 export const createBooking = async (req, res) => {
   try {
     const {
@@ -16,7 +12,7 @@ export const createBooking = async (req, res) => {
 
     if (!propertyId || !checkIn || !checkOut || !guests) {
       return res.status(400).json({
-        message: "All booking fields are required",
+        message: "All booking details are required",
       });
     }
 
@@ -28,50 +24,42 @@ export const createBooking = async (req, res) => {
       });
     }
 
-    const start = new Date(checkIn);
-    const end = new Date(checkOut);
+    const startDate = new Date(checkIn);
+    const endDate = new Date(checkOut);
 
-    if (end <= start) {
+    if (endDate <= startDate) {
       return res.status(400).json({
         message: "Check-out must be after check-in",
       });
     }
 
-    if (Number(guests) > property.guests) {
+    if (Number(guests) > Number(property.guests)) {
       return res.status(400).json({
         message: `Maximum ${property.guests} guests allowed`,
       });
     }
 
-    // Calculate number of nights
     const millisecondsPerDay = 1000 * 60 * 60 * 24;
 
     const nights = Math.ceil(
-      (end - start) / millisecondsPerDay
+      (endDate - startDate) / millisecondsPerDay
     );
 
-    const totalPrice =
-      nights * Number(property.price);
+    const totalPrice = nights * Number(property.price);
 
     const booking = await Booking.create({
       property: propertyId,
       user: req.user._id,
-      checkIn: start,
-      checkOut: end,
+      checkIn: startDate,
+      checkOut: endDate,
       guests: Number(guests),
       totalPrice,
     });
 
-    const populatedBooking =
-      await Booking.findById(booking._id)
-        .populate("property")
-        .populate("user", "name email");
-
     res.status(201).json({
       message: "Booking created successfully",
-      booking: populatedBooking,
+      booking,
     });
-
   } catch (error) {
     console.error("Create booking error:", error);
 
@@ -82,10 +70,6 @@ export const createBooking = async (req, res) => {
 };
 
 
-// ============================
-// GET MY BOOKINGS
-// ============================
-
 export const getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({
@@ -95,10 +79,8 @@ export const getMyBookings = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.status(200).json({
-      count: bookings.length,
       bookings,
     });
-
   } catch (error) {
     console.error("Get bookings error:", error);
 

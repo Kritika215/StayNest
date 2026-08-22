@@ -1,19 +1,45 @@
-import { useState } from "react";
-import { Menu, X, UserCircle, CalendarDays } from "lucide-react";
-import { Link, NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Menu, X, UserCircle } from "lucide-react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const navigate = useNavigate();
 
   const navClass = ({ isActive }) =>
-    `text-sm font-medium transition ${isActive
-      ? "text-[#E07A5F]"
-      : "text-gray-600 hover:text-gray-900"
+    `text-sm font-medium transition ${
+      isActive
+        ? "text-[#E07A5F]"
+        : "text-gray-600 hover:text-gray-900"
     }`;
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Invalid user data");
+        localStorage.removeItem("user");
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    setUser(null);
+    setOpen(false);
+
+    navigate("/login");
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur">
-
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* LOGO */}
@@ -45,19 +71,14 @@ function Navbar() {
             Explore
           </NavLink>
 
-          <NavLink
-            to="/my-bookings"
-            className={navClass}
-          >
-            My Bookings
-          </NavLink>
-
-          <Link
-            to="/host-dashboard"
-            className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
-          >
-            Become a host
-          </Link>
+          {user && (
+            <Link
+              to="/create-property"
+              className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
+            >
+              Become a host
+            </Link>
+          )}
 
         </div>
 
@@ -66,20 +87,57 @@ function Navbar() {
 
         <div className="hidden items-center gap-3 md:flex">
 
-          <Link
-            to="/login"
-            className="flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-          >
-            <UserCircle size={18} />
-            Login
-          </Link>
+          {!user ? (
+            <>
+              <Link
+                to="/login"
+                className="flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+              >
+                <UserCircle size={18} />
+                Login
+              </Link>
 
-          <Link
-            to="/register"
-            className="rounded-full bg-[#E07A5F] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#d96c50]"
-          >
-            Sign up
-          </Link>
+              <Link
+                to="/register"
+                className="rounded-full bg-[#E07A5F] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#d96c50]"
+              >
+                Sign up
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/host-dashboard"
+                className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
+              >
+                Dashboard
+              </Link>
+
+              <div className="flex items-center gap-3">
+
+                <div className="flex h-9 items-center gap-2 rounded-full bg-[#F4EFEA] px-4">
+
+                  <UserCircle
+                    size={18}
+                    className="text-[#E07A5F]"
+                  />
+
+                  <span className="text-sm font-semibold text-gray-800">
+                    Hi, {user.name || "User"}
+                  </span>
+
+                </div>
+
+                <button
+                  onClick={handleLogout}
+                  className="rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
+                >
+                  Logout
+                </button>
+
+              </div>
+            </>
+          )}
 
         </div>
 
@@ -109,94 +167,93 @@ function Navbar() {
 
           <div className="flex flex-col">
 
-            {/* HOME */}
-
             <NavLink
               to="/"
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `rounded-xl px-4 py-3 text-sm font-medium ${isActive
-                  ? "bg-[#F4EFEA] text-[#E07A5F]"
-                  : "text-gray-700"
+                `rounded-xl px-4 py-3 text-sm font-medium ${
+                  isActive
+                    ? "bg-[#F4EFEA] text-[#E07A5F]"
+                    : "text-gray-700"
                 }`
               }
             >
               Home
             </NavLink>
 
-
-            {/* EXPLORE */}
-
             <NavLink
               to="/explore"
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `rounded-xl px-4 py-3 text-sm font-medium ${isActive
-                  ? "bg-[#F4EFEA] text-[#E07A5F]"
-                  : "text-gray-700"
+                `rounded-xl px-4 py-3 text-sm font-medium ${
+                  isActive
+                    ? "bg-[#F4EFEA] text-[#E07A5F]"
+                    : "text-gray-700"
                 }`
               }
             >
               Explore
             </NavLink>
 
+            {user && (
+              <>
+                <Link
+                  to="/create-property"
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700"
+                >
+                  Become a host
+                </Link>
 
-            {/* MY BOOKINGS */}
-
-            <NavLink
-              to="/my-bookings"
-              onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium ${isActive
-                  ? "bg-[#F4EFEA] text-[#E07A5F]"
-                  : "text-gray-700"
-                }`
-              }
-            >
-              <CalendarDays size={17} />
-              My Bookings
-            </NavLink>
-
-
-            {/* HOST */}
-
-            <Link
-              to="/host-dashboard"
-              className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
-            >
-              Become a host
-            </Link>
-
+                <Link
+                  to="/host-dashboard"
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700"
+                >
+                  Dashboard
+                </Link>
+              </>
+            )}
 
             <div className="my-2 border-t border-gray-100" />
 
+            {!user ? (
+              <>
+                <Link
+                  to="/login"
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700"
+                >
+                  Login
+                </Link>
 
-            {/* LOGIN */}
+                <Link
+                  to="/register"
+                  onClick={() => setOpen(false)}
+                  className="mt-2 rounded-xl bg-[#E07A5F] px-4 py-3 text-center text-sm font-semibold text-white"
+                >
+                  Sign up
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="rounded-xl bg-[#F4EFEA] px-4 py-3 text-sm font-semibold text-gray-800">
+                  Hi, {user.name || "User"}
+                </div>
 
-            <Link
-              to="/login"
-              onClick={() => setOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700"
-            >
-              Login
-            </Link>
-
-
-            {/* SIGN UP */}
-
-            <Link
-              to="/register"
-              onClick={() => setOpen(false)}
-              className="mt-2 rounded-xl bg-[#E07A5F] px-4 py-3 text-center text-sm font-semibold text-white"
-            >
-              Sign up
-            </Link>
+                <button
+                  onClick={handleLogout}
+                  className="mt-2 rounded-xl border border-gray-200 px-4 py-3 text-left text-sm font-medium text-gray-700"
+                >
+                  Logout
+                </button>
+              </>
+            )}
 
           </div>
 
         </div>
       )}
-
     </header>
   );
 }

@@ -5,12 +5,20 @@ import {
   getMyBookings,
 } from "../controllers/bookingController.js";
 
-import protect from "../middleware/authMiddleware.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", protect, createBooking);
+router.post(
+  "/",
+  authMiddleware,
+  createBooking
+);
 
-router.get("/my", protect, getMyBookings);
+router.get(
+  "/my",
+  authMiddleware,
+  getMyBookings
+);
 
 export default router;
