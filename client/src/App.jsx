@@ -13,7 +13,7 @@ import Wishlist from "./pages/Wishlist";
 import MyBookings from "./pages/MyBookings";
 import HostDashboard from "./pages/HostDashboard";
 import EditProperty from "./pages/EditProperty";
-
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -42,7 +42,11 @@ function App() {
 
           <Route
             path="/create-property"
-            element={<CreateProperty />}
+            element={
+              <ProtectedRoute>
+                <CreateProperty />
+              </ProtectedRoute>
+            }
           />
 
           <Route
@@ -56,24 +60,35 @@ function App() {
           />
 
           <Route
-              path="/wishlist"
-              element={<Wishlist />}
+            path="/wishlist"
+            element={<Wishlist />}
           />
 
           <Route
-             path="/my-bookings"
-              element={<MyBookings />}
-            />
+            path="/my-bookings"
+            element={
+              <ProtectedRoute>
+                <MyBookings />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-             path="/host-dashboard"
-             element={<HostDashboard />}
-            />
+          <Route
+            path="/host-dashboard"
+            element={
+              <ProtectedRoute>
+                <HostDashboard />
+              </ProtectedRoute>}
+          />
 
-            <Route
-  path="/edit-property/:id"
-  element={<EditProperty />}
-/>
+          <Route
+            path="/edit-property/:id"
+            element={
+              <ProtectedRoute>
+                <EditProperty />
+              </ProtectedRoute>
+            }
+          />
 
         </Routes>
 
