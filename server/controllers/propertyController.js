@@ -134,3 +134,87 @@ export const createProperty = async (req, res) => {
     });
   }
 };
+
+// UPDATE PROPERTY
+export const updateProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const property = await Property.findById(id);
+
+    if (!property) {
+      return res.status(404).json({
+        message: "Property not found",
+      });
+    }
+
+    // Only owner can edit
+    if (
+      property.host &&
+      property.host.toString() !== req.user.id
+    ) {
+      return res.status(403).json({
+        message: "Not authorized",
+      });
+    }
+
+    const updatedProperty =
+      await Property.findByIdAndUpdate(
+        id,
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+    res.status(200).json({
+      message: "Property updated successfully",
+      property: updatedProperty,
+    });
+  } catch (error) {
+    console.error("Update property error:", error);
+
+    res.status(500).json({
+      message: "Failed to update property",
+    });
+  }
+};
+
+
+// DELETE PROPERTY
+export const deleteProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const property = await Property.findById(id);
+
+    if (!property) {
+      return res.status(404).json({
+        message: "Property not found",
+      });
+    }
+
+    // Only owner can delete
+    if (
+      property.host &&
+      property.host.toString() !== req.user.id
+    ) {
+      return res.status(403).json({
+        message: "Not authorized",
+      });
+    }
+
+    await Property.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: "Property deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete property error:", error);
+
+    res.status(500).json({
+      message: "Failed to delete property",
+    });
+  }
+};

@@ -1,12 +1,44 @@
-import { useEffect, useState } from "react";
-import { Menu, X, UserCircle } from "lucide-react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import {
+  Menu,
+  X,
+  UserCircle,
+} from "lucide-react";
+import {
+  Link,
+  NavLink,
+  useNavigate,
+} from "react-router-dom";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
+
+  const storedUser = localStorage.getItem("user");
+
+  let user = null;
+
+  try {
+    user = storedUser
+      ? JSON.parse(storedUser)
+      : null;
+  } catch {
+    user = null;
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    setOpen(false);
+
+    navigate("/login");
+
+    window.location.reload();
+  };
 
   const navClass = ({ isActive }) =>
     `text-sm font-medium transition ${
@@ -15,31 +47,9 @@ function Navbar() {
         : "text-gray-600 hover:text-gray-900"
     }`;
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("Invalid user data");
-        localStorage.removeItem("user");
-      }
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    setUser(null);
-    setOpen(false);
-
-    navigate("/login");
-  };
-
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur">
+
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* LOGO */}
@@ -55,7 +65,7 @@ function Navbar() {
 
         {/* DESKTOP NAV */}
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-7 md:flex">
 
           <NavLink
             to="/"
@@ -71,12 +81,21 @@ function Navbar() {
             Explore
           </NavLink>
 
-          {user && (
+          {token && (
             <Link
               to="/create-property"
               className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
             >
               Become a host
+            </Link>
+          )}
+
+          {token && (
+            <Link
+              to="/my-bookings"
+              className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
+            >
+              My Bookings
             </Link>
           )}
 
@@ -87,7 +106,7 @@ function Navbar() {
 
         <div className="hidden items-center gap-3 md:flex">
 
-          {!user ? (
+          {!token ? (
             <>
               <Link
                 to="/login"
@@ -106,36 +125,27 @@ function Navbar() {
             </>
           ) : (
             <>
-              <Link
-                to="/host-dashboard"
-                className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
-              >
-                Dashboard
-              </Link>
+              <div className="flex items-center gap-2 rounded-full bg-[#F4EFEA] px-4 py-2">
 
-              <div className="flex items-center gap-3">
-
-                <div className="flex h-9 items-center gap-2 rounded-full bg-[#F4EFEA] px-4">
-
-                  <UserCircle
-                    size={18}
-                    className="text-[#E07A5F]"
-                  />
-
-                  <span className="text-sm font-semibold text-gray-800">
-                    Hi, {user.name || "User"}
-                  </span>
-
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E07A5F] text-xs font-bold text-white">
+                  {user?.name
+                    ?.charAt(0)
+                    ?.toUpperCase() || "U"}
                 </div>
 
-                <button
-                  onClick={handleLogout}
-                  className="rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
-                >
-                  Logout
-                </button>
+                <span className="max-w-[120px] truncate text-sm font-medium text-gray-700">
+                  {user?.name || "User"}
+                </span>
 
               </div>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 hover:text-gray-900"
+              >
+                Logout
+              </button>
             </>
           )}
 
@@ -181,6 +191,7 @@ function Navbar() {
               Home
             </NavLink>
 
+
             <NavLink
               to="/explore"
               onClick={() => setOpen(false)}
@@ -195,29 +206,33 @@ function Navbar() {
               Explore
             </NavLink>
 
-            {user && (
-              <>
-                <Link
-                  to="/create-property"
-                  onClick={() => setOpen(false)}
-                  className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700"
-                >
-                  Become a host
-                </Link>
 
-                <Link
-                  to="/host-dashboard"
-                  onClick={() => setOpen(false)}
-                  className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700"
-                >
-                  Dashboard
-                </Link>
-              </>
+            {token && (
+              <Link
+                to="/create-property"
+                onClick={() => setOpen(false)}
+                className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700"
+              >
+                Become a host
+              </Link>
             )}
+
+
+            {token && (
+              <Link
+                to="/my-bookings"
+                onClick={() => setOpen(false)}
+                className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700"
+              >
+                My Bookings
+              </Link>
+            )}
+
 
             <div className="my-2 border-t border-gray-100" />
 
-            {!user ? (
+
+            {!token ? (
               <>
                 <Link
                   to="/login"
@@ -237,13 +252,22 @@ function Navbar() {
               </>
             ) : (
               <>
-                <div className="rounded-xl bg-[#F4EFEA] px-4 py-3 text-sm font-semibold text-gray-800">
-                  Hi, {user.name || "User"}
+                <div className="px-4 py-3">
+
+                  <p className="text-xs text-gray-400">
+                    Signed in as
+                  </p>
+
+                  <p className="mt-1 font-semibold text-gray-800">
+                    {user?.name || "User"}
+                  </p>
+
                 </div>
 
                 <button
+                  type="button"
                   onClick={handleLogout}
-                  className="mt-2 rounded-xl border border-gray-200 px-4 py-3 text-left text-sm font-medium text-gray-700"
+                  className="rounded-xl px-4 py-3 text-left text-sm font-medium text-red-500"
                 >
                   Logout
                 </button>
@@ -254,6 +278,7 @@ function Navbar() {
 
         </div>
       )}
+
     </header>
   );
 }

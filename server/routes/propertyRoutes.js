@@ -1,23 +1,37 @@
 import express from "express";
 
 import {
-  getProperties,
-  getProperty,
   createProperty,
+  getProperties,
+  getPropertyById,
+  updateProperty,
+  deleteProperty,
 } from "../controllers/propertyController.js";
 
-import protect from "../middleware/authMiddleware.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-
-// Public
 router.get("/", getProperties);
 
-router.get("/:id", getProperty);
+router.get("/:id", getPropertyById);
 
+router.post(
+  "/",
+  authMiddleware,
+  createProperty
+);
 
-// Protected - logged-in user
-router.post("/", protect, createProperty);
+router.put(
+  "/:id",
+  authMiddleware,
+  updateProperty
+);
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  deleteProperty
+);
 
 export default router;

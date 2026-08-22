@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
@@ -9,11 +10,8 @@ import PropertyDetails from "./pages/PropertyDetails";
 import CreateProperty from "./pages/CreateProperty";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Wishlist from "./pages/Wishlist";
 import MyBookings from "./pages/MyBookings";
-import HostDashboard from "./pages/HostDashboard";
-import EditProperty from "./pages/EditProperty";
-import ProtectedRoute from "./components/ProtectedRoute";
+import MyProperties from "./pages/MyProperties";
 
 function App() {
   return (
@@ -24,6 +22,8 @@ function App() {
         <Navbar />
 
         <Routes>
+
+          {/* PUBLIC */}
 
           <Route
             path="/"
@@ -41,15 +41,6 @@ function App() {
           />
 
           <Route
-            path="/create-property"
-            element={
-              <ProtectedRoute>
-                <CreateProperty />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
             path="/login"
             element={<Login />}
           />
@@ -59,9 +50,16 @@ function App() {
             element={<Register />}
           />
 
+
+          {/* PROTECTED */}
+
           <Route
-            path="/wishlist"
-            element={<Wishlist />}
+            path="/create-property"
+            element={
+              <ProtectedRoute>
+                <CreateProperty />
+              </ProtectedRoute>
+            }
           />
 
           <Route
@@ -74,18 +72,10 @@ function App() {
           />
 
           <Route
-            path="/host-dashboard"
+            path="/my-properties"
             element={
               <ProtectedRoute>
-                <HostDashboard />
-              </ProtectedRoute>}
-          />
-
-          <Route
-            path="/edit-property/:id"
-            element={
-              <ProtectedRoute>
-                <EditProperty />
+                <MyProperties />
               </ProtectedRoute>
             }
           />
