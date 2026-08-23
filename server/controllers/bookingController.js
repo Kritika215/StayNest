@@ -89,3 +89,47 @@ export const getMyBookings = async (req, res) => {
     });
   }
 };
+
+// CANCEL BOOKING
+export const cancelBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const booking = await Booking.findById(id);
+
+    if (!booking) {
+      return res.status(404).json({
+        message: "Booking not found",
+      });
+    }
+
+    // Only the person who made the booking can cancel it
+    if (booking.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "Not authorized to cancel this booking",
+      });
+    }
+
+    // Already cancelled
+    if (booking.status === "cancelled") {
+      return res.status(400).json({
+        message: "Booking is already cancelled",
+      });
+    }
+
+    booking.status = "cancelled";
+
+    await booking.save();
+
+    res.status(200).json({
+      message: "Booking cancelled successfully",
+      booking,
+    });
+  } catch (error) {
+    console.error("Cancel booking error:", error);
+
+    res.status(500).json({
+      message: "Failed to cancel booking",
+    });
+  }
+};

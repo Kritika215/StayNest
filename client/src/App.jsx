@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MyBookings from "./pages/MyBookings";
 import MyProperties from "./pages/MyProperties";
+import EditProperty from "./pages/EditProperty";
 
 function App() {
   return (
@@ -49,6 +50,10 @@ function App() {
             path="/register"
             element={<Register />}
           />
+          <Route
+  path="/edit-property/:id"
+  element={<EditProperty />}
+/>
 
 
           {/* PROTECTED */}

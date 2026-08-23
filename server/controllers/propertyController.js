@@ -218,3 +218,25 @@ export const deleteProperty = async (req, res) => {
     });
   }
 };
+
+// GET MY PROPERTIES
+export const getMyProperties = async (req, res) => {
+  try {
+    const properties = await Property.find({
+      host: req.user._id,
+    })
+      .populate("host", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      count: properties.length,
+      properties,
+    });
+  } catch (error) {
+    console.error("Get my properties error:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch your properties",
+    });
+  }
+};

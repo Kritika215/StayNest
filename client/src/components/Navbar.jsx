@@ -41,10 +41,9 @@ function Navbar() {
   };
 
   const navClass = ({ isActive }) =>
-    `text-sm font-medium transition ${
-      isActive
-        ? "text-[#E07A5F]"
-        : "text-gray-600 hover:text-gray-900"
+    `text-sm font-medium transition ${isActive
+      ? "text-[#E07A5F]"
+      : "text-gray-600 hover:text-gray-900"
     }`;
 
   return (
@@ -96,6 +95,15 @@ function Navbar() {
               className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
             >
               My Bookings
+            </Link>
+          )}
+
+          {token && (
+            <Link
+              to="/my-properties"
+              className="text-sm font-medium text-gray-600 transition hover:text-gray-900"
+            >
+              My Properties
             </Link>
           )}
 
@@ -181,10 +189,9 @@ function Navbar() {
               to="/"
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `rounded-xl px-4 py-3 text-sm font-medium ${
-                  isActive
-                    ? "bg-[#F4EFEA] text-[#E07A5F]"
-                    : "text-gray-700"
+                `rounded-xl px-4 py-3 text-sm font-medium ${isActive
+                  ? "bg-[#F4EFEA] text-[#E07A5F]"
+                  : "text-gray-700"
                 }`
               }
             >
@@ -196,10 +203,9 @@ function Navbar() {
               to="/explore"
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `rounded-xl px-4 py-3 text-sm font-medium ${
-                  isActive
-                    ? "bg-[#F4EFEA] text-[#E07A5F]"
-                    : "text-gray-700"
+                `rounded-xl px-4 py-3 text-sm font-medium ${isActive
+                  ? "bg-[#F4EFEA] text-[#E07A5F]"
+                  : "text-gray-700"
                 }`
               }
             >
