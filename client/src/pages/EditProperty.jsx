@@ -10,18 +10,18 @@ function EditProperty() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
     title: "",
     description: "",
     location: "",
     city: "",
     price: "",
-    guests: 1,
-    bedrooms: 1,
-    beds: 1,
-    bathrooms: 1,
+    guests: "",
+    bedrooms: "",
+    beds: "",
+    bathrooms: "",
     category: "",
     image: "",
     amenities: "",
@@ -33,19 +33,25 @@ function EditProperty() {
 
   const fetchProperty = async () => {
     try {
-      const response = await api.get(`/properties/${id}`);
+      setLoading(true);
+      setError("");
+
+      const response = await api.get(
+        `/properties/${id}`
+      );
+
       const property = response.data.property;
 
-      setForm({
+      setFormData({
         title: property.title || "",
         description: property.description || "",
         location: property.location || "",
         city: property.city || "",
         price: property.price || "",
-        guests: property.guests || 1,
-        bedrooms: property.bedrooms || 1,
-        beds: property.beds || 1,
-        bathrooms: property.bathrooms || 1,
+        guests: property.guests || "",
+        bedrooms: property.bedrooms || "",
+        beds: property.beds || "",
+        bathrooms: property.bathrooms || "",
         category: property.category || "",
         image:
           property.image ||
@@ -55,7 +61,10 @@ function EditProperty() {
           property.amenities?.join(", ") || "",
       });
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Fetch property error:",
+        err
+      );
 
       setError(
         err.response?.data?.message ||
@@ -69,7 +78,7 @@ function EditProperty() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setForm((prev) => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -81,37 +90,47 @@ function EditProperty() {
     try {
       setSaving(true);
       setError("");
-      setMessage("");
+      setSuccess("");
 
-      await api.put(`/properties/${id}`, {
-        title: form.title,
-        description: form.description,
-        location: form.location,
-        city: form.city,
-        price: Number(form.price),
-        guests: Number(form.guests),
-        bedrooms: Number(form.bedrooms),
-        beds: Number(form.beds),
-        bathrooms: Number(form.bathrooms),
-        category: form.category,
-        image: form.image,
-        amenities: form.amenities
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        city: formData.city,
+        price: Number(formData.price),
+        guests: Number(formData.guests),
+        bedrooms: Number(formData.bedrooms),
+        beds: Number(formData.beds),
+        bathrooms: Number(formData.bathrooms),
+        category: formData.category,
+        image: formData.image,
+        amenities: formData.amenities
           .split(",")
           .map((item) => item.trim())
           .filter(Boolean),
-      });
+      };
 
-      setMessage("Property updated successfully.");
+      await api.put(
+        `/properties/${id}`,
+        payload
+      );
+
+      setSuccess(
+        "Property updated successfully!"
+      );
 
       setTimeout(() => {
         navigate("/my-properties");
       }, 800);
     } catch (err) {
-      console.error("Update error:", err);
+      console.error(
+        "Update property error:",
+        err
+      );
 
       setError(
         err.response?.data?.message ||
-          "Failed to update property."
+          "Unable to update property."
       );
     } finally {
       setSaving(false);
@@ -120,67 +139,50 @@ function EditProperty() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#FAFAF8] px-4 py-12">
+      <main className="min-h-screen bg-[#FAFAF8] px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
+
           <div className="h-8 w-56 animate-pulse rounded bg-gray-200" />
+
           <div className="mt-8 h-[600px] animate-pulse rounded-3xl bg-gray-200" />
-        </div>
-      </main>
-    );
-  }
 
-  if (error && !form.title) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#FAFAF8] px-4">
-        <div className="rounded-3xl bg-white p-8 text-center shadow-sm">
-          <h1 className="text-xl font-bold text-gray-900">
-            Unable to load property
-          </h1>
-
-          <p className="mt-2 text-sm text-red-500">
-            {error}
-          </p>
-
-          <Link
-            to="/my-properties"
-            className="mt-5 inline-flex rounded-xl bg-[#E07A5F] px-5 py-3 text-sm font-semibold text-white"
-          >
-            Back to My Properties
-          </Link>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#FAFAF8] px-4 py-10 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#FAFAF8] px-4 py-12 sm:px-6 lg:px-8">
 
       <div className="mx-auto max-w-3xl">
 
-        {/* HEADER */}
+        {/* BACK */}
 
         <Link
           to="/my-properties"
-          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-900"
         >
           <ArrowLeft size={17} />
-          Back to My Properties
+          Back to my properties
         </Link>
 
+        {/* HEADER */}
+
         <div className="mt-7">
+
           <p className="text-sm font-semibold uppercase tracking-wider text-[#E07A5F]">
             Host dashboard
           </p>
 
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900">
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Edit Property
           </h1>
 
           <p className="mt-2 text-sm text-gray-500">
-            Update your property information.
+            Update the details of your StayNest listing.
           </p>
-        </div>
 
+        </div>
 
         {/* FORM */}
 
@@ -188,6 +190,18 @@ function EditProperty() {
           onSubmit={handleSubmit}
           className="mt-8 rounded-3xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8"
         >
+
+          {error && (
+            <div className="mb-6 rounded-2xl bg-red-50 p-4 text-sm font-medium text-red-600">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-6 rounded-2xl bg-green-50 p-4 text-sm font-medium text-green-700">
+              {success}
+            </div>
+          )}
 
           {/* TITLE */}
 
@@ -197,14 +211,15 @@ function EditProperty() {
             </label>
 
             <input
+              type="text"
               name="title"
-              value={form.title}
+              value={formData.title}
               onChange={handleChange}
               required
-              className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#E07A5F]"
+              placeholder="Beautiful mountain villa"
+              className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
             />
           </div>
-
 
           {/* DESCRIPTION */}
 
@@ -215,13 +230,14 @@ function EditProperty() {
 
             <textarea
               name="description"
-              value={form.description}
+              value={formData.description}
               onChange={handleChange}
+              required
               rows={5}
-              className="mt-2 w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#E07A5F]"
+              placeholder="Describe your property..."
+              className="mt-2 w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
             />
           </div>
-
 
           {/* LOCATION */}
 
@@ -233,11 +249,13 @@ function EditProperty() {
               </label>
 
               <input
+                type="text"
                 name="location"
-                value={form.location}
+                value={formData.location}
                 onChange={handleChange}
                 required
-                className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#E07A5F]"
+                placeholder="Mall Road"
+                className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
               />
             </div>
 
@@ -247,18 +265,19 @@ function EditProperty() {
               </label>
 
               <input
+                type="text"
                 name="city"
-                value={form.city}
+                value={formData.city}
                 onChange={handleChange}
                 required
-                className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#E07A5F]"
+                placeholder="Manali"
+                className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
               />
             </div>
 
           </div>
 
-
-          {/* PRICE / CATEGORY */}
+          {/* PRICE + GUESTS */}
 
           <div className="mt-5 grid gap-5 sm:grid-cols-2">
 
@@ -270,104 +289,132 @@ function EditProperty() {
               <input
                 type="number"
                 name="price"
-                min="0"
-                value={form.price}
+                value={formData.price}
                 onChange={handleChange}
+                min="0"
                 required
-                className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#E07A5F]"
+                placeholder="2500"
+                className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
               />
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700">
-                Category
-              </label>
-
-              <select
-                name="category"
-                value={form.category}
-                onChange={handleChange}
-                className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-[#E07A5F]"
-              >
-                <option value="">Select category</option>
-                <option value="Apartment">Apartment</option>
-                <option value="Villa">Villa</option>
-                <option value="House">House</option>
-                <option value="Hotel">Hotel</option>
-                <option value="Cabin">Cabin</option>
-                <option value="Cottage">Cottage</option>
-              </select>
-            </div>
-
-          </div>
-
-
-          {/* GUEST DETAILS */}
-
-          <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
-
-            <div>
-              <label className="text-xs font-semibold text-gray-600">
-                Guests
+                Maximum guests
               </label>
 
               <input
                 type="number"
                 name="guests"
-                min="1"
-                value={form.guests}
+                value={formData.guests}
                 onChange={handleChange}
-                className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#E07A5F]"
+                min="1"
+                required
+                placeholder="4"
+                className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
               />
             </div>
 
+          </div>
+
+          {/* ROOMS */}
+
+          <div className="mt-5 grid gap-5 sm:grid-cols-3">
+
             <div>
-              <label className="text-xs font-semibold text-gray-600">
+              <label className="text-sm font-semibold text-gray-700">
                 Bedrooms
               </label>
 
               <input
                 type="number"
                 name="bedrooms"
-                min="1"
-                value={form.bedrooms}
+                value={formData.bedrooms}
                 onChange={handleChange}
-                className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#E07A5F]"
+                min="0"
+                required
+                className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
               />
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-gray-600">
+              <label className="text-sm font-semibold text-gray-700">
                 Beds
               </label>
 
               <input
                 type="number"
                 name="beds"
-                min="1"
-                value={form.beds}
+                value={formData.beds}
                 onChange={handleChange}
-                className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#E07A5F]"
+                min="0"
+                required
+                className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
               />
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-gray-600">
+              <label className="text-sm font-semibold text-gray-700">
                 Bathrooms
               </label>
 
               <input
                 type="number"
                 name="bathrooms"
-                min="1"
-                value={form.bathrooms}
+                value={formData.bathrooms}
                 onChange={handleChange}
-                className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#E07A5F]"
+                min="0"
+                required
+                className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
               />
             </div>
 
           </div>
 
+          {/* CATEGORY */}
+
+          <div className="mt-5">
+            <label className="text-sm font-semibold text-gray-700">
+              Category
+            </label>
+
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
+              className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
+            >
+              <option value="">
+                Select category
+              </option>
+
+              <option value="Apartment">
+                Apartment
+              </option>
+
+              <option value="Villa">
+                Villa
+              </option>
+
+              <option value="House">
+                House
+              </option>
+
+              <option value="Cabin">
+                Cabin
+              </option>
+
+              <option value="Hotel">
+                Hotel
+              </option>
+
+              <option value="Resort">
+                Resort
+              </option>
+
+            </select>
+          </div>
 
           {/* IMAGE */}
 
@@ -377,14 +424,22 @@ function EditProperty() {
             </label>
 
             <input
+              type="url"
               name="image"
-              value={form.image}
+              value={formData.image}
               onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
-              className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#E07A5F]"
+              placeholder="https://..."
+              className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
             />
-          </div>
 
+            {formData.image && (
+              <img
+                src={formData.image}
+                alt="Property preview"
+                className="mt-4 h-48 w-full rounded-2xl object-cover"
+              />
+            )}
+          </div>
 
           {/* AMENITIES */}
 
@@ -394,49 +449,31 @@ function EditProperty() {
             </label>
 
             <input
+              type="text"
               name="amenities"
-              value={form.amenities}
+              value={formData.amenities}
               onChange={handleChange}
               placeholder="WiFi, Parking, Kitchen, Pool"
-              className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#E07A5F]"
+              className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#E07A5F]"
             />
 
-            <p className="mt-1 text-xs text-gray-400">
-              Separate amenities with commas.
+            <p className="mt-2 text-xs text-gray-400">
+              Separate amenities using commas.
             </p>
           </div>
 
-
-          {/* ERROR */}
-
-          {error && (
-            <div className="mt-5 rounded-xl bg-red-50 p-3 text-sm font-medium text-red-600">
-              {error}
-            </div>
-          )}
-
-
-          {/* SUCCESS */}
-
-          {message && (
-            <div className="mt-5 rounded-xl bg-green-50 p-3 text-sm font-medium text-green-700">
-              {message}
-            </div>
-          )}
-
-
-          {/* BUTTON */}
+          {/* SUBMIT */}
 
           <button
             type="submit"
             disabled={saving}
-            className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-[#E07A5F] py-3.5 text-sm font-bold text-white transition hover:bg-[#D96D52] disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#E07A5F] py-3.5 text-sm font-bold text-white transition hover:bg-[#D96D52] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Save size={17} />
 
             {saving
               ? "Saving changes..."
-              : "Save Changes"}
+              : "Save changes"}
           </button>
 
         </form>

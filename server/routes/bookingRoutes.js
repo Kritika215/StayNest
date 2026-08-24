@@ -17,7 +17,7 @@ router.post(
   createBooking
 );
 
-// GET MY BOOKINGS
+// MY BOOKINGS
 router.get(
   "/my",
   authMiddleware,
