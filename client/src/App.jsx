@@ -13,6 +13,8 @@ import Register from "./pages/Register";
 import MyBookings from "./pages/MyBookings";
 import MyProperties from "./pages/MyProperties";
 import EditProperty from "./pages/EditProperty";
+import HostBookings from "./pages/HostBookings";
+
 
 function App() {
   return (
@@ -55,6 +57,11 @@ function App() {
   element={<EditProperty />}
 />
 
+
+<Route
+  path="/host-bookings"
+  element={<HostBookings />}
+/>
 
           {/* PROTECTED */}
 

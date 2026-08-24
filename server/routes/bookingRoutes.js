@@ -4,6 +4,8 @@ import {
   createBooking,
   getMyBookings,
   cancelBooking,
+  getHostBookings,
+  updateBookingStatus,
 } from "../controllers/bookingController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -29,6 +31,20 @@ router.delete(
   "/:id",
   authMiddleware,
   cancelBooking
+);
+
+// HOST BOOKINGS
+router.get(
+  "/host",
+  authMiddleware,
+  getHostBookings
+);
+
+// UPDATE BOOKING STATUS
+router.put(
+  "/:id/status",
+  authMiddleware,
+  updateBookingStatus
 );
 
 export default router;

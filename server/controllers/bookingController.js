@@ -232,3 +232,101 @@ export const cancelBooking = async (
     });
   }
 };
+
+// GET HOST BOOKINGS
+export const getHostBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate({
+        path: "property",
+        match: { host: req.user._id },
+        select:
+          "title location city image images price",
+      })
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+
+    const hostBookings = bookings.filter(
+      (booking) => booking.property
+    );
+
+    res.status(200).json({
+      count: hostBookings.length,
+      bookings: hostBookings,
+    });
+  } catch (error) {
+    console.error(
+      "Get host bookings error:",
+      error
+    );
+
+    res.status(500).json({
+      message:
+        "Failed to fetch host bookings",
+    });
+  }
+};
+
+
+// UPDATE BOOKING STATUS
+export const updateBookingStatus = async (
+  req,
+  res
+) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (
+      !["confirmed", "cancelled"].includes(
+        status
+      )
+    ) {
+      return res.status(400).json({
+        message: "Invalid booking status",
+      });
+    }
+
+    const booking =
+      await Booking.findById(id).populate(
+        "property"
+      );
+
+    if (!booking) {
+      return res.status(404).json({
+        message: "Booking not found",
+      });
+    }
+
+    if (
+      !booking.property ||
+      booking.property.host.toString() !==
+        req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        message:
+          "You are not authorized to update this booking",
+      });
+    }
+
+    booking.status = status;
+
+    await booking.save();
+
+    res.status(200).json({
+      message:
+        "Booking status updated successfully",
+      booking,
+    });
+  } catch (error) {
+    console.error(
+      "Update booking status error:",
+      error
+    );
+
+    res.status(500).json({
+      message:
+        "Failed to update booking status",
+    });
+  }
+};
