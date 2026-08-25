@@ -53,15 +53,15 @@ function App() {
             element={<Register />}
           />
           <Route
-  path="/edit-property/:id"
-  element={<EditProperty />}
-/>
+            path="/edit-property/:id"
+            element={<EditProperty />}
+          />
 
 
-<Route
-  path="/host-bookings"
-  element={<HostBookings />}
-/>
+          <Route
+            path="/host-bookings"
+            element={<HostBookings />}
+          />
 
           {/* PROTECTED */}
 

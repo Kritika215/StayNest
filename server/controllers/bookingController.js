@@ -8,126 +8,62 @@ import Property from "../models/Property.js";
 export const createBooking = async (req, res) => {
   try {
     const {
-      propertyId,
+      property,
       checkIn,
       checkOut,
       guests,
+      totalPrice,
     } = req.body;
 
-    // Validate required fields
-    if (
-      !propertyId ||
-      !checkIn ||
-      !checkOut ||
-      !guests
-    ) {
+    if (!property || !checkIn || !checkOut || !guests) {
       return res.status(400).json({
-        message: "All booking fields are required",
+        message: "All booking details are required",
       });
     }
 
-    // Validate dates
-    const checkInDate = new Date(checkIn);
-    const checkOutDate = new Date(checkOut);
+    const startDate = new Date(checkIn);
+    const endDate = new Date(checkOut);
 
-    if (
-      isNaN(checkInDate.getTime()) ||
-      isNaN(checkOutDate.getTime())
-    ) {
+    if (startDate >= endDate) {
       return res.status(400).json({
-        message: "Invalid booking dates",
+        message: "Check-out date must be after check-in date",
       });
     }
 
-    if (checkOutDate <= checkInDate) {
-      return res.status(400).json({
-        message:
-          "Check-out date must be after check-in date",
-      });
-    }
-
-    // Find property
-    const property = await Property.findById(
-      propertyId
-    );
-
-    if (!property) {
-      return res.status(404).json({
-        message: "Property not found",
-      });
-    }
-
-    // Validate guests
-    if (
-      Number(guests) < 1 ||
-      Number(guests) > Number(property.guests)
-    ) {
-      return res.status(400).json({
-        message: `Maximum ${property.guests} guests allowed`,
-      });
-    }
-
-    // Check for overlapping bookings
-    const existingBooking =
-      await Booking.findOne({
-        property: propertyId,
-        status: {
-          $ne: "cancelled",
-        },
-        checkIn: {
-          $lt: checkOutDate,
-        },
-        checkOut: {
-          $gt: checkInDate,
-        },
-      });
+    // Check for overlapping active bookings
+    const existingBooking = await Booking.findOne({
+      property,
+      status: { $ne: "cancelled" },
+      checkIn: { $lt: endDate },
+      checkOut: { $gt: startDate },
+    });
 
     if (existingBooking) {
-      return res.status(400).json({
-        message:
-          "This property is already booked for the selected dates",
+      return res.status(409).json({
+        message: "This property is already booked for these dates",
       });
     }
 
-    // Calculate number of nights
-    const millisecondsPerDay =
-      1000 * 60 * 60 * 24;
-
-    const nights = Math.ceil(
-      (checkOutDate - checkInDate) /
-        millisecondsPerDay
-    );
-
-    // Calculate total price
-    const totalPrice =
-      nights * Number(property.price);
-
-    // Create booking
     const booking = await Booking.create({
       user: req.user._id,
-      property: propertyId,
-      checkIn: checkInDate,
-      checkOut: checkOutDate,
-      guests: Number(guests),
+      property,
+      checkIn: startDate,
+      checkOut: endDate,
+      guests,
       totalPrice,
       status: "confirmed",
     });
 
-    // Populate property details
-    await booking.populate(
-      "property",
-      "title location city price image images"
-    );
+    const populatedBooking = await Booking.findById(
+      booking._id
+    ).populate("property");
 
     res.status(201).json({
-      message: "Booking successful!",
-      booking,
+      message: "Booking created successfully",
+      booking: populatedBooking,
     });
   } catch (error) {
-    console.error(
-      "Create booking error:",
-      error
-    );
+    console.error("Create booking error:", error);
 
     res.status(500).json({
       message: "Failed to create booking",

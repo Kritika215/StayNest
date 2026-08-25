@@ -1,12 +1,20 @@
-
 import { useEffect, useState } from "react";
-import { CalendarDays, MapPin, Users, CheckCircle, XCircle } from "lucide-react";
+import {
+  CalendarDays,
+  MapPin,
+  Users,
+  Check,
+  X,
+  Clock,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 import api from "../api/axios";
 
 function HostBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
     fetchHostBookings();
@@ -32,26 +40,53 @@ function HostBookings() {
     }
   };
 
-  const updateBookingStatus = async (bookingId, status) => {
+  const updateStatus = async (bookingId, status) => {
     try {
-      await api.put(`/bookings/${bookingId}/status`, {
-        status,
-      });
+      setUpdatingId(bookingId);
+
+      const response = await api.put(
+        `/bookings/${bookingId}/status`,
+        { status }
+      );
+
+      const updatedBooking = response.data.booking;
 
       setBookings((prev) =>
         prev.map((booking) =>
           booking._id === bookingId
-            ? { ...booking, status }
+            ? updatedBooking || {
+                ...booking,
+                status,
+              }
             : booking
         )
       );
     } catch (err) {
-      console.error("Booking status error:", err);
+      console.error("Update booking status error:", err);
 
       alert(
         err.response?.data?.message ||
           "Unable to update booking."
       );
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case "confirmed":
+        return "bg-green-50 text-green-700";
+
+      case "cancelled":
+        return "bg-red-50 text-red-600";
+
+      case "rejected":
+        return "bg-red-50 text-red-600";
+
+      case "pending":
+      default:
+        return "bg-yellow-50 text-yellow-700";
     }
   };
 
@@ -59,16 +94,20 @@ function HostBookings() {
     return (
       <main className="min-h-screen bg-[#FAFAF8] px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="h-8 w-64 animate-pulse rounded bg-gray-200" />
 
-          <div className="mt-8 grid gap-6 md:grid-cols-2">
-            {[1, 2].map((item) => (
+          <div className="h-5 w-32 animate-pulse rounded bg-gray-200" />
+
+          <div className="mt-3 h-10 w-72 animate-pulse rounded bg-gray-200" />
+
+          <div className="mt-10 space-y-5">
+            {[1, 2, 3].map((item) => (
               <div
                 key={item}
-                className="h-64 animate-pulse rounded-3xl bg-gray-200"
+                className="h-48 animate-pulse rounded-3xl bg-gray-200"
               />
             ))}
           </div>
+
         </div>
       </main>
     );
@@ -78,47 +117,61 @@ function HostBookings() {
     <main className="min-h-screen bg-[#FAFAF8] px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
 
-        <p className="text-sm font-semibold uppercase tracking-wider text-[#E07A5F]">
-          Host dashboard
-        </p>
+        {/* HEADER */}
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-widest text-[#E07A5F]">
+            Host dashboard
+          </p>
 
-        <h1 className="mt-2 text-3xl font-bold text-gray-900 sm:text-4xl">
-          Booking Requests
-        </h1>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            Booking Requests
+          </h1>
 
-        <p className="mt-2 text-sm text-gray-500">
-          Manage guests who have requested to stay at your properties.
-        </p>
+          <p className="mt-2 text-sm text-gray-500">
+            Manage reservations for your properties.
+          </p>
+        </div>
 
+        {/* ERROR */}
         {error && (
-          <div className="mt-8 rounded-2xl bg-red-50 p-5 text-sm font-medium text-red-600">
+          <div className="mt-8 rounded-2xl border border-red-100 bg-red-50 p-5 text-sm font-medium text-red-600">
             {error}
           </div>
         )}
 
+        {/* EMPTY */}
         {!error && bookings.length === 0 && (
-          <div className="mt-10 rounded-3xl bg-white p-12 text-center shadow-sm">
-            <CalendarDays
-              size={42}
-              className="mx-auto text-gray-300"
-            />
+          <div className="mt-10 rounded-3xl border border-gray-100 bg-white p-12 text-center shadow-sm">
 
-            <h2 className="mt-4 text-xl font-bold text-gray-900">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#F4EFEA] text-[#E07A5F]">
+              <CalendarDays size={28} />
+            </div>
+
+            <h2 className="mt-5 text-xl font-bold text-gray-900">
               No booking requests
             </h2>
 
-            <p className="mt-2 text-sm text-gray-500">
-              Booking requests for your properties will appear here.
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
+              When guests book one of your properties,
+              their reservations will appear here.
             </p>
+
+            <Link
+              to="/my-properties"
+              className="mt-6 inline-flex rounded-xl bg-[#E07A5F] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#D96D52]"
+            >
+              View my properties
+            </Link>
+
           </div>
         )}
 
+        {/* BOOKINGS */}
         {!error && bookings.length > 0 && (
           <div className="mt-10 space-y-5">
 
             {bookings.map((booking) => {
               const property = booking.property;
-              const guest = booking.user;
 
               const image =
                 property?.image ||
@@ -128,6 +181,9 @@ function HostBookings() {
               const status =
                 booking.status || "pending";
 
+              const guest =
+                booking.user || booking.guest;
+
               return (
                 <article
                   key={booking._id}
@@ -135,29 +191,39 @@ function HostBookings() {
                 >
                   <div className="flex flex-col lg:flex-row">
 
-                    {image ? (
-                      <img
-                        src={image}
-                        alt={property?.title || "Property"}
-                        className="h-56 w-full object-cover lg:h-auto lg:w-64"
-                      />
-                    ) : (
-                      <div className="flex h-56 w-full items-center justify-center bg-gray-100 text-sm text-gray-400 lg:h-auto lg:w-64">
-                        No image
-                      </div>
-                    )}
+                    {/* IMAGE */}
+                    <div className="h-56 w-full shrink-0 bg-gray-100 lg:h-auto lg:w-64">
 
+                      {image ? (
+                        <img
+                          src={image}
+                          alt={
+                            property?.title ||
+                            "Property"
+                          }
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-sm text-gray-400">
+                          No image
+                        </div>
+                      )}
+
+                    </div>
+
+                    {/* CONTENT */}
                     <div className="flex-1 p-6">
 
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 
                         <div>
-                          <h2 className="text-lg font-bold text-gray-900">
-                            {property?.title || "Property"}
+                          <h2 className="text-xl font-bold text-gray-900">
+                            {property?.title ||
+                              "Property"}
                           </h2>
 
                           <p className="mt-1 flex items-center gap-1.5 text-sm text-gray-500">
-                            <MapPin size={14} />
+                            <MapPin size={15} />
                             {property?.location ||
                               property?.city ||
                               "Location"}
@@ -165,30 +231,42 @@ function HostBookings() {
                         </div>
 
                         <span
-                          className={`w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${
-                            status === "confirmed"
-                              ? "bg-green-50 text-green-700"
-                              : status === "cancelled"
-                              ? "bg-red-50 text-red-600"
-                              : "bg-yellow-50 text-yellow-700"
-                          }`}
+                          className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${getStatusStyle(
+                            status
+                          )}`}
                         >
+                          {status === "pending" && (
+                            <Clock size={13} />
+                          )}
+
                           {status}
                         </span>
 
                       </div>
 
-                      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      {/* GUEST */}
+                      <div className="mt-6 rounded-2xl bg-[#FAFAF8] p-4">
 
-                        <div>
-                          <p className="text-xs font-semibold uppercase text-gray-400">
-                            Guest
-                          </p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                          Guest
+                        </p>
 
-                          <p className="mt-1 text-sm font-medium text-gray-800">
-                            {guest?.name || "Guest"}
+                        <p className="mt-1 font-semibold text-gray-900">
+                          {guest?.name ||
+                            guest?.username ||
+                            "Guest"}
+                        </p>
+
+                        {guest?.email && (
+                          <p className="mt-1 text-sm text-gray-500">
+                            {guest.email}
                           </p>
-                        </div>
+                        )}
+
+                      </div>
+
+                      {/* BOOKING DETAILS */}
+                      <div className="mt-5 grid gap-4 sm:grid-cols-3">
 
                         <div>
                           <p className="text-xs font-semibold uppercase text-gray-400">
@@ -196,9 +274,11 @@ function HostBookings() {
                           </p>
 
                           <p className="mt-1 text-sm font-medium text-gray-800">
-                            {new Date(
-                              booking.checkIn
-                            ).toLocaleDateString()}
+                            {booking.checkIn
+                              ? new Date(
+                                  booking.checkIn
+                                ).toLocaleDateString()
+                              : "-"}
                           </p>
                         </div>
 
@@ -208,33 +288,36 @@ function HostBookings() {
                           </p>
 
                           <p className="mt-1 text-sm font-medium text-gray-800">
-                            {new Date(
-                              booking.checkOut
-                            ).toLocaleDateString()}
+                            {booking.checkOut
+                              ? new Date(
+                                  booking.checkOut
+                                ).toLocaleDateString()
+                              : "-"}
                           </p>
                         </div>
 
                         <div>
-                          <p className="text-xs font-semibold uppercase text-gray-400">
+                          <p className="flex items-center gap-1 text-xs font-semibold uppercase text-gray-400">
+                            <Users size={13} />
                             Guests
                           </p>
 
-                          <p className="mt-1 flex items-center gap-1 text-sm font-medium text-gray-800">
-                            <Users size={14} />
-                            {booking.guests}
+                          <p className="mt-1 text-sm font-medium text-gray-800">
+                            {booking.guests || 1}
                           </p>
                         </div>
 
                       </div>
 
+                      {/* BOTTOM */}
                       <div className="mt-6 flex flex-col gap-4 border-t border-gray-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
 
                         <div>
                           <p className="text-xs text-gray-400">
-                            Total booking value
+                            Booking amount
                           </p>
 
-                          <p className="mt-1 text-lg font-bold text-gray-900">
+                          <p className="mt-1 text-xl font-bold text-gray-900">
                             ₹
                             {Number(
                               booking.totalPrice ||
@@ -244,35 +327,48 @@ function HostBookings() {
                           </p>
                         </div>
 
+                        {/* ACTIONS */}
                         {status === "pending" && (
                           <div className="flex gap-2">
 
                             <button
                               type="button"
+                              disabled={
+                                updatingId ===
+                                booking._id
+                              }
                               onClick={() =>
-                                updateBookingStatus(
+                                updateStatus(
                                   booking._id,
                                   "confirmed"
                                 )
                               }
-                              className="flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+                              className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                              <CheckCircle size={16} />
-                              Confirm
+                              <Check size={16} />
+
+                              {updatingId ===
+                              booking._id
+                                ? "Updating..."
+                                : "Accept"}
                             </button>
 
                             <button
                               type="button"
+                              disabled={
+                                updatingId ===
+                                booking._id
+                              }
                               onClick={() =>
-                                updateBookingStatus(
+                                updateStatus(
                                   booking._id,
-                                  "cancelled"
+                                  "rejected"
                                 )
                               }
-                              className="flex items-center gap-2 rounded-xl border border-red-100 px-4 py-2.5 text-sm font-semibold text-red-500 transition hover:bg-red-50"
+                              className="inline-flex items-center gap-2 rounded-xl border border-red-100 px-4 py-2.5 text-sm font-semibold text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                              <XCircle size={16} />
-                              Decline
+                              <X size={16} />
+                              Reject
                             </button>
 
                           </div>
@@ -281,7 +377,6 @@ function HostBookings() {
                       </div>
 
                     </div>
-
                   </div>
                 </article>
               );
@@ -296,4 +391,3 @@ function HostBookings() {
 }
 
 export default HostBookings;
-
