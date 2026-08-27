@@ -44,91 +44,87 @@ function Booking({ property }) {
 
   const totalPrice = nights * pricePerNight;
 
-  const handleBooking = async (e) => {
-    e.preventDefault();
+ const handleBooking = async (e) => {
+  e.preventDefault();
 
-    setError("");
-    setSuccess("");
+  setError("");
+  setSuccess("");
 
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    if (!token) {
-      navigate("/login");
-      return;
-    }
+  if (!token) {
+    navigate("/login");
+    return;
+  }
 
-    if (!checkIn || !checkOut) {
-      setError(
-        "Please select check-in and check-out dates."
-      );
-      return;
-    }
+  if (!checkIn || !checkOut) {
+    setError("Please select check-in and check-out dates.");
+    return;
+  }
 
-    if (nights <= 0) {
-      setError(
-        "Check-out date must be after check-in date."
-      );
-      return;
-    }
+  if (nights <= 0) {
+    setError("Check-out date must be after check-in date.");
+    return;
+  }
 
-    if (guests < 1) {
-      setError("At least 1 guest is required.");
-      return;
-    }
+  if (guests < 1) {
+    setError("At least 1 guest is required.");
+    return;
+  }
 
-    if (
-      property?.guests &&
-      guests > Number(property.guests)
-    ) {
-      setError(
-        `Maximum ${property.guests} guests allowed.`
-      );
-      return;
-    }
+  if (
+    property?.guests &&
+    guests > Number(property.guests)
+  ) {
+    setError(
+      `Maximum ${property.guests} guests allowed.`
+    );
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const response = await api.post(
-  "/bookings",
-  {
-    property: property._id,
-    checkIn,
-    checkOut,
-    guests,
-    totalPrice,
-  },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const response = await api.post(
+      "/bookings",
+      {
+        property: property._id,
+        checkIn,
+        checkOut,
+        guests,
+        totalPrice,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      setSuccess(
-        response.data.message ||
-          "Booking created successfully!"
-      );
+    setSuccess(
+      response.data.message ||
+        "Booking created successfully!"
+    );
 
-      setCheckIn("");
-      setCheckOut("");
-      setGuests(1);
+    setCheckIn("");
+    setCheckOut("");
+    setGuests(1);
 
-      setTimeout(() => {
-        navigate("/my-bookings");
-      }, 1200);
+    setTimeout(() => {
+      navigate("/my-bookings");
+    }, 1200);
 
-    } catch (error) {
-      console.error("Booking error:", error);
+  } catch (error) {
+    console.error("Booking error:", error);
 
-      setError(
-        error.response?.data?.message ||
-          "Unable to create booking. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    setError(
+      error.response?.data?.message ||
+        "Unable to create booking. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-lg sm:p-6">

@@ -14,7 +14,7 @@ import { Link, useParams } from "react-router-dom";
 
 import api from "../api/axios";
 import Booking from "../components/Booking";
-
+import Reviews from "../components/Reviews";
 function PropertyDetails() {
   const { id } = useParams();
 
@@ -464,6 +464,12 @@ function PropertyDetails() {
 
               </div>
             )}
+
+            {/* REVIEWS */}
+
+<div className="border-t border-gray-200 py-8">
+  <Reviews propertyId={property._id} />
+</div>
 
           </div>
 

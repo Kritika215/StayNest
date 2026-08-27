@@ -15,16 +15,18 @@ import MyProperties from "./pages/MyProperties";
 import EditProperty from "./pages/EditProperty";
 import HostBookings from "./pages/HostBookings";
 
+
 function App() {
   return (
     <BrowserRouter>
+
       <div className="min-h-screen bg-[#FAFAF8]">
 
         <Navbar />
 
         <Routes>
 
-          {/* PUBLIC */}
+          {/* ================= PUBLIC ================= */}
 
           <Route
             path="/"
@@ -52,7 +54,7 @@ function App() {
           />
 
 
-          {/* PROTECTED */}
+          {/* ================= PROTECTED ================= */}
 
           <Route
             path="/create-property"
@@ -104,6 +106,7 @@ function App() {
         <Footer />
 
       </div>
+
     </BrowserRouter>
   );
 }
