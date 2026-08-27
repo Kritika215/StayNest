@@ -90,13 +90,14 @@ function Booking({ property }) {
       setLoading(true);
 
       const response = await api.post(
-        "/bookings",
-        {
-          propertyId: property._id,
-          checkIn,
-          checkOut,
-          guests,
-        },
+  "/bookings",
+  {
+    property: property._id,
+    checkIn,
+    checkOut,
+    guests,
+    totalPrice,
+  },
         {
           headers: {
             Authorization: `Bearer ${token}`,

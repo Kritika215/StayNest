@@ -6,6 +6,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import propertyRoutes from "./routes/propertyRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
 
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/reviews", reviewRoutes);
 // Test route
 app.get("/", (req, res) => {
   res.json({

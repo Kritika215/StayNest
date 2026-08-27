@@ -64,6 +64,7 @@ const propertySchema = new mongoose.Schema(
         "Cottage",
         "Cabin",
         "House",
+        "Hotel",
         "Resort",
       ],
       default: "House",

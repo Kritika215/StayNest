@@ -15,11 +15,9 @@ import MyProperties from "./pages/MyProperties";
 import EditProperty from "./pages/EditProperty";
 import HostBookings from "./pages/HostBookings";
 
-
 function App() {
   return (
     <BrowserRouter>
-
       <div className="min-h-screen bg-[#FAFAF8]">
 
         <Navbar />
@@ -39,7 +37,7 @@ function App() {
           />
 
           <Route
-            path="/property/:id"
+            path="/properties/:id"
             element={<PropertyDetails />}
           />
 
@@ -52,16 +50,7 @@ function App() {
             path="/register"
             element={<Register />}
           />
-          <Route
-            path="/edit-property/:id"
-            element={<EditProperty />}
-          />
 
-
-          <Route
-            path="/host-bookings"
-            element={<HostBookings />}
-          />
 
           {/* PROTECTED */}
 
@@ -92,12 +81,29 @@ function App() {
             }
           />
 
+          <Route
+            path="/edit-property/:id"
+            element={
+              <ProtectedRoute>
+                <EditProperty />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/host-bookings"
+            element={
+              <ProtectedRoute>
+                <HostBookings />
+              </ProtectedRoute>
+            }
+          />
+
         </Routes>
 
         <Footer />
 
       </div>
-
     </BrowserRouter>
   );
 }
