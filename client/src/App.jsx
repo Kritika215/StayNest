@@ -26,8 +26,6 @@ function App() {
 
         <Routes>
 
-          {/* ================= PUBLIC ================= */}
-
           <Route
             path="/"
             element={<Home />}
@@ -52,9 +50,6 @@ function App() {
             path="/register"
             element={<Register />}
           />
-
-
-          {/* ================= PROTECTED ================= */}
 
           <Route
             path="/create-property"

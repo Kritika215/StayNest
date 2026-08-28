@@ -8,28 +8,48 @@ function MyBookings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // ============================
+  // FETCH MY BOOKINGS
+  // ============================
+
   useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setError("Please login to view your bookings.");
+          return;
+        }
+
+        const response = await api.get("/bookings/my", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setBookings(response.data.bookings || []);
+      } catch (err) {
+        console.error("Fetch bookings error:", err);
+
+        setError(
+          err.response?.data?.message ||
+            "Unable to load your bookings."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchBookings();
   }, []);
 
- const fetchBookings = async () => {
-  try {
-    setLoading(true);
-
-    const response = await api.get("/bookings/my");
-
-    setBookings(response.data.bookings || []);
-  } catch (err) {
-    console.error(err);
-
-    setError(
-      err.response?.data?.message ||
-        "Unable to load your bookings."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+  // ============================
+  // CANCEL BOOKING
+  // ============================
 
   const cancelBooking = async (bookingId) => {
     const confirmed = window.confirm(
@@ -39,7 +59,13 @@ function MyBookings() {
     if (!confirmed) return;
 
     try {
-      await api.delete(`/bookings/${bookingId}`);
+      const token = localStorage.getItem("token");
+
+      await api.delete(`/bookings/${bookingId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setBookings((prev) =>
         prev.map((booking) =>
@@ -49,7 +75,7 @@ function MyBookings() {
         )
       );
     } catch (err) {
-      console.error(err);
+      console.error("Cancel booking error:", err);
 
       alert(
         err.response?.data?.message ||
@@ -57,6 +83,10 @@ function MyBookings() {
       );
     }
   };
+
+  // ============================
+  // LOADING
+  // ============================
 
   if (loading) {
     return (
@@ -66,14 +96,12 @@ function MyBookings() {
           <div className="h-8 w-56 animate-pulse rounded bg-gray-200" />
 
           <div className="mt-8 grid gap-6 md:grid-cols-2">
-
             {[1, 2].map((item) => (
               <div
                 key={item}
                 className="h-64 animate-pulse rounded-3xl bg-gray-200"
               />
             ))}
-
           </div>
 
         </div>
@@ -81,10 +109,16 @@ function MyBookings() {
     );
   }
 
+  // ============================
+  // PAGE
+  // ============================
+
   return (
     <main className="min-h-screen bg-[#FAFAF8] px-4 py-12 sm:px-6 lg:px-8">
 
       <div className="mx-auto max-w-6xl">
+
+        {/* HEADER */}
 
         <p className="text-sm font-semibold uppercase tracking-wider text-[#E07A5F]">
           Your trips
@@ -98,14 +132,19 @@ function MyBookings() {
           Manage your upcoming and previous stays.
         </p>
 
+        {/* ERROR */}
+
         {error && (
           <div className="mt-8 rounded-2xl bg-red-50 p-5 text-sm font-medium text-red-600">
             {error}
           </div>
         )}
 
+        {/* NO BOOKINGS */}
+
         {!error && bookings.length === 0 && (
           <div className="mt-10 rounded-3xl bg-white p-12 text-center shadow-sm">
+
             <CalendarDays
               size={40}
               className="mx-auto text-gray-300"
@@ -121,18 +160,20 @@ function MyBookings() {
 
             <Link
               to="/explore"
-              className="mt-6 inline-flex rounded-xl bg-[#E07A5F] px-6 py-3 text-sm font-semibold text-white"
+              className="mt-6 inline-flex rounded-xl bg-[#E07A5F] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#D96D52]"
             >
               Explore stays
             </Link>
+
           </div>
         )}
+
+        {/* BOOKINGS */}
 
         {!error && bookings.length > 0 && (
           <div className="mt-10 grid gap-6 md:grid-cols-2">
 
             {bookings.map((booking) => {
-
               const property = booking.property;
 
               const image =
@@ -151,6 +192,8 @@ function MyBookings() {
 
                   <div className="flex flex-col sm:flex-row">
 
+                    {/* IMAGE */}
+
                     {image ? (
                       <img
                         src={image}
@@ -163,28 +206,36 @@ function MyBookings() {
                       </div>
                     )}
 
+                    {/* DETAILS */}
+
                     <div className="flex-1 p-5">
 
                       <div className="flex items-start justify-between gap-3">
 
-                        <div>
+                        <div className="min-w-0">
+
                           <h2 className="font-bold text-gray-900">
-                            {property?.title ||
-                              "Property"}
+                            {property?.title || "Property"}
                           </h2>
 
                           <p className="mt-1 flex items-center gap-1 text-sm text-gray-500">
                             <MapPin size={14} />
+
                             {property?.location ||
                               property?.city ||
                               "Location"}
                           </p>
+
                         </div>
 
+                        {/* STATUS */}
+
                         <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${
+                          className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold capitalize ${
                             status === "cancelled"
                               ? "bg-red-50 text-red-600"
+                              : status === "pending"
+                              ? "bg-yellow-50 text-yellow-700"
                               : "bg-green-50 text-green-700"
                           }`}
                         >
@@ -193,28 +244,36 @@ function MyBookings() {
 
                       </div>
 
+                      {/* BOOKING INFO */}
+
                       <div className="mt-5 space-y-2 text-sm text-gray-600">
 
                         <p>
                           <strong>Check-in:</strong>{" "}
-                          {new Date(
-                            booking.checkIn
-                          ).toLocaleDateString()}
+                          {booking.checkIn
+                            ? new Date(
+                                booking.checkIn
+                              ).toLocaleDateString("en-IN")
+                            : "N/A"}
                         </p>
 
                         <p>
                           <strong>Check-out:</strong>{" "}
-                          {new Date(
-                            booking.checkOut
-                          ).toLocaleDateString()}
+                          {booking.checkOut
+                            ? new Date(
+                                booking.checkOut
+                              ).toLocaleDateString("en-IN")
+                            : "N/A"}
                         </p>
 
                         <p>
                           <strong>Guests:</strong>{" "}
-                          {booking.guests}
+                          {booking.guests || 1}
                         </p>
 
                       </div>
+
+                      {/* PRICE + CANCEL */}
 
                       <div className="mt-5 flex items-center justify-between">
 
@@ -231,9 +290,7 @@ function MyBookings() {
                           <button
                             type="button"
                             onClick={() =>
-                              cancelBooking(
-                                booking._id
-                              )
+                              cancelBooking(booking._id)
                             }
                             className="flex items-center gap-1.5 rounded-xl border border-red-100 px-3 py-2 text-xs font-semibold text-red-500 transition hover:bg-red-50"
                           >

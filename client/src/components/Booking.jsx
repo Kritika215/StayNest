@@ -19,6 +19,10 @@ function Booking({ property }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // ============================
+  // CALCULATE NIGHTS
+  // ============================
+
   const calculateNights = () => {
     if (!checkIn || !checkOut) {
       return 0;
@@ -40,91 +44,134 @@ function Booking({ property }) {
 
   const nights = calculateNights();
 
-  const pricePerNight = Number(property?.price || 0);
+  const pricePerNight = Number(
+    property?.price || 0
+  );
 
   const totalPrice = nights * pricePerNight;
 
- const handleBooking = async (e) => {
-  e.preventDefault();
+  // ============================
+  // HANDLE BOOKING
+  // ============================
 
-  setError("");
-  setSuccess("");
+  const handleBooking = async (e) => {
+    e.preventDefault();
 
-  const token = localStorage.getItem("token");
+    setError("");
+    setSuccess("");
 
-  if (!token) {
-    navigate("/login");
-    return;
-  }
+    const token = localStorage.getItem("token");
 
-  if (!checkIn || !checkOut) {
-    setError("Please select check-in and check-out dates.");
-    return;
-  }
+    // Login required
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-  if (nights <= 0) {
-    setError("Check-out date must be after check-in date.");
-    return;
-  }
+    // Dates validation
+    if (!checkIn || !checkOut) {
+      setError(
+        "Please select check-in and check-out dates."
+      );
+      return;
+    }
 
-  if (guests < 1) {
-    setError("At least 1 guest is required.");
-    return;
-  }
+    if (nights <= 0) {
+      setError(
+        "Check-out date must be after check-in date."
+      );
+      return;
+    }
 
-  if (
-    property?.guests &&
-    guests > Number(property.guests)
-  ) {
-    setError(
-      `Maximum ${property.guests} guests allowed.`
-    );
-    return;
-  }
+    // Guest validation
+    if (guests < 1) {
+      setError("At least 1 guest is required.");
+      return;
+    }
 
-  try {
-    setLoading(true);
+    if (
+      property?.guests &&
+      guests > Number(property.guests)
+    ) {
+      setError(
+        `Maximum ${property.guests} guests allowed.`
+      );
+      return;
+    }
 
-    const response = await api.post(
-      "/bookings",
-      {
-        property: property._id,
-        checkIn,
-        checkOut,
-        guests,
-        totalPrice,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    // Prevent host from booking own property
+    try {
+      const storedUser =
+        localStorage.getItem("user");
+
+      const currentUser = storedUser
+        ? JSON.parse(storedUser)
+        : null;
+
+      if (
+        property?.host?._id &&
+        currentUser?._id &&
+        String(property.host._id) ===
+          String(currentUser._id)
+      ) {
+        setError(
+          "You cannot book your own property."
+        );
+        return;
       }
-    );
+    } catch (error) {
+      console.error(
+        "Unable to read user data:",
+        error
+      );
+    }
 
-    setSuccess(
-      response.data.message ||
-        "Booking created successfully!"
-    );
+    try {
+      setLoading(true);
 
-    setCheckIn("");
-    setCheckOut("");
-    setGuests(1);
+      const response = await api.post(
+        "/bookings",
+        {
+          property: property._id,
+          checkIn,
+          checkOut,
+          guests,
+          totalPrice,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    setTimeout(() => {
-      navigate("/my-bookings");
-    }, 1200);
+      setSuccess(
+        response.data.message ||
+          "Booking created successfully!"
+      );
 
-  } catch (error) {
-    console.error("Booking error:", error);
+      setCheckIn("");
+      setCheckOut("");
+      setGuests(1);
 
-    setError(
-      error.response?.data?.message ||
-        "Unable to create booking. Please try again."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+      setTimeout(() => {
+        navigate("/my-bookings");
+      }, 1200);
+    } catch (error) {
+      console.error("Booking error:", error);
+
+      setError(
+        error.response?.data?.message ||
+          "Unable to create booking. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ============================
+  // RENDER
+  // ============================
 
   return (
     <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-lg sm:p-6">
@@ -132,7 +179,6 @@ function Booking({ property }) {
       {/* PRICE */}
 
       <div className="mb-6 flex items-baseline gap-1">
-
         <span className="text-2xl font-bold text-gray-900">
           ₹{pricePerNight.toLocaleString("en-IN")}
         </span>
@@ -140,20 +186,20 @@ function Booking({ property }) {
         <span className="text-sm text-gray-500">
           / night
         </span>
-
       </div>
-
 
       <form
         onSubmit={handleBooking}
         className="space-y-4"
       >
 
-        {/* DATES */}
+        {/* ============================
+            DATES
+        ============================ */}
 
         <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-gray-300 sm:grid-cols-2">
 
-          {/* CHECK IN */}
+          {/* CHECK-IN */}
 
           <div className="border-b border-gray-300 p-4 sm:border-b-0 sm:border-r">
 
@@ -178,8 +224,7 @@ function Booking({ property }) {
 
           </div>
 
-
-          {/* CHECK OUT */}
+          {/* CHECK-OUT */}
 
           <div className="p-4">
 
@@ -207,8 +252,9 @@ function Booking({ property }) {
 
         </div>
 
-
-        {/* GUESTS */}
+        {/* ============================
+            GUESTS
+        ============================ */}
 
         <div className="rounded-2xl border border-gray-300 p-4">
 
@@ -224,7 +270,6 @@ function Booking({ property }) {
             }
             className="w-full bg-transparent text-sm text-gray-700 outline-none"
           >
-
             {Array.from(
               {
                 length: Math.min(
@@ -244,13 +289,13 @@ function Booking({ property }) {
                   : "guests"}
               </option>
             ))}
-
           </select>
 
         </div>
 
-
-        {/* ERROR */}
+        {/* ============================
+            ERROR
+        ============================ */}
 
         {error && (
           <div className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
@@ -258,8 +303,9 @@ function Booking({ property }) {
           </div>
         )}
 
-
-        {/* SUCCESS */}
+        {/* ============================
+            SUCCESS
+        ============================ */}
 
         {success && (
           <div className="rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-600">
@@ -267,8 +313,9 @@ function Booking({ property }) {
           </div>
         )}
 
-
-        {/* PRICE SUMMARY */}
+        {/* ============================
+            PRICE SUMMARY
+        ============================ */}
 
         {nights > 0 && (
           <div className="space-y-3 border-t border-gray-100 pt-5">
@@ -276,8 +323,8 @@ function Booking({ property }) {
             <div className="flex justify-between text-sm text-gray-600">
 
               <span>
-                ₹{pricePerNight.toLocaleString("en-IN")} ×{" "}
-                {nights}{" "}
+                ₹{pricePerNight.toLocaleString("en-IN")}{" "}
+                × {nights}{" "}
                 {nights === 1
                   ? "night"
                   : "nights"}
@@ -289,7 +336,6 @@ function Booking({ property }) {
 
             </div>
 
-
             <div className="flex items-center justify-between border-t border-gray-100 pt-3">
 
               <span className="font-semibold text-gray-900">
@@ -297,11 +343,8 @@ function Booking({ property }) {
               </span>
 
               <span className="flex items-center font-bold text-gray-900">
-
                 <IndianRupee size={16} />
-
                 {totalPrice.toLocaleString("en-IN")}
-
               </span>
 
             </div>
@@ -309,37 +352,34 @@ function Booking({ property }) {
           </div>
         )}
 
-
-        {/* BOOK BUTTON */}
+        {/* ============================
+            BOOK BUTTON
+        ============================ */}
 
         <button
           type="submit"
           disabled={loading}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#E07A5F] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#d96c50] disabled:cursor-not-allowed disabled:opacity-60"
         >
-
           {loading ? (
             <>
               <Loader2
                 size={18}
                 className="animate-spin"
               />
-
               Booking...
             </>
           ) : (
             "Reserve your stay"
           )}
-
         </button>
 
-
         <p className="text-center text-xs text-gray-400">
-          You won't be charged until your booking is confirmed.
+          Your booking will be confirmed after
+          successful submission.
         </p>
 
       </form>
-
     </div>
   );
 }
